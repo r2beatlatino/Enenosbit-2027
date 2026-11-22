@@ -227,6 +227,26 @@ def dar_objeto(usn, item, cantidad=1, vence=PERMANENTE, con=None):
     return res
 
 
+def gastar_objeto(usn, item, cantidad=1):
+    """M10: descuenta `cantidad` unidades de `item` de la seccion `tienda` de `usn`, con el candado de cuenta.py (comprobar y gastar
+    en UNA sola operacion). Cuenta lo que tiene en cantidad >= `cantidad` y sin plazo vencido; el registro que llega a 0 se borra.
+    -> la cantidad que le queda, o None si no lo tiene (no escribe nada). No crea la bolsa ni da regalos."""
+    if not isinstance(cantidad, int) or isinstance(cantidad, bool) or cantidad < 1:
+        return None
+    ahora = time.time()
+
+    def quitar(b):
+        for reg in b.get("items", []):
+            if reg[0] == item and (_permanente(reg[1]) or reg[1] > ahora) and reg[2] >= cantidad:
+                reg[2] -= cantidad
+                if reg[2] <= 0:
+                    b["items"].remove(reg)
+                    return 0
+                return reg[2]
+        return None
+    return _cta.cambiar_seccion(str(usn), "tienda", quitar)
+
+
 def exp_de(con):
     return _con_bolsa(con, lambda b: b.get("exp", 0))
 

@@ -23,6 +23,7 @@ import struct
 import time
 
 import captura
+import cuenta
 import estado
 import fichas
 import textos
@@ -876,15 +877,144 @@ def selector(con, seq, cuerpo):
     return True
 
 
+FAVORITAS_TOPE = 2000     # tope del 2013 (picker.PREFERIDAS_TOPE): mas que el catalogo, solo corta basura
+
+
+def _leer_lista_canciones(cuerpo):
+    """[u16 n][u16 cancion] x n -> lista de ids, o None si el largo no cierra (picker.leer_lista del 2013)."""
+    if len(cuerpo) < 2:
+        return None
+    n = struct.unpack_from("<H", cuerpo, 0)[0]
+    if n > FAVORITAS_TOPE or len(cuerpo) != 2 + 2 * n:
+        return None
+    return [struct.unpack_from("<H", cuerpo, 2 + 2 * i)[0] for i in range(n)]
+
+
+def canciones_favoritas(con, seq, cuerpo):
+    """M08. C2S FF137 SendGetFavoriteSongs (0 B, grabado 4/4) -> S2C FF137 CmdGetFavoriteSongs [u16 n][u16 cancion] x n
+    (lect=['2','2'] en tabla_ff_cruce.json, igual a 2019 y 2013). Con FAVORITAS=0 o sin cuenta local devuelve False para
+    que conteste cuenta_local.favoritas (00 00, igual que antes)."""
+    if not llave("FAVORITAS") or cuerpo:
+        return False
+    usn = (con.cuenta or {}).get("usn")
+    if not usn:
+        return False
+    try:
+        favs = [int(c) & 0xFFFF for c in (cuenta.leer_seccion(usn, "musica").get("favoritas") or [])
+                if 0 < int(c) <= 0xFFFF][:FAVORITAS_TOPE]
+    except cuenta.CuentaError as e:
+        anotar("   ⛔ FF137 favoritas usn %s: %s" % (usn, e))
+        favs = []
+    con.mandar_interno(0x137, seq, struct.pack("<H", len(favs)) + b"".join(struct.pack("<H", c) for c in favs))
+    anotar("   S2C FF137 favoritas de %s (usn %s): %d" % ((con.cuenta or {}).get("nick"), usn, len(favs)))
+    return True
+
+
+def _cambiar_favoritas(con, cuerpo, agregar):
+    """M08. C2S FF138 (agregar) / FF13A (quitar): [u16 n][u16 cancion] x n (forma del 2013 picker.py; sin respuesta S2C,
+    rx=False en tabla_ff_cruce.json). Con FAVORITAS=0 o sin cuenta local devuelve False."""
+    if not llave("FAVORITAS"):
+        return False
+    usn = (con.cuenta or {}).get("usn")
+    if not usn:
+        return False
+    lista = _leer_lista_canciones(cuerpo)
+    if lista is None:
+        return False
+
+    def cambiar(sec):
+        favs = [int(c) for c in (sec.get("favoritas") or []) if 0 < int(c) <= 0xFFFF][:FAVORITAS_TOPE]
+        if agregar:
+            for c in lista:
+                if 0 < c <= 0xFFFF and c not in favs and len(favs) < FAVORITAS_TOPE:
+                    favs.append(c)
+        else:
+            quitar = set(lista)
+            favs = [c for c in favs if c not in quitar]
+        if favs:
+            sec["favoritas"] = favs
+        else:
+            sec.pop("favoritas", None)
+        return list(favs)
+
+    try:
+        quedan = cuenta.cambiar_seccion(usn, "musica", cambiar)
+    except cuenta.CuentaError as e:
+        anotar("   ⛔ FF%X favoritas usn %s: %s" % (0x138 if agregar else 0x13A, usn, e))
+        return True
+    anotar("   C2S FF%X favoritas de %s (usn %s): %s%s -> quedan %d"
+           % (0x138 if agregar else 0x13A, (con.cuenta or {}).get("nick"), usn, "+" if agregar else "-", lista, len(quedan)))
+    return True
+
+
+def agregar_favoritas(con, seq, cuerpo):
+    """M08. C2S FF138 SendAddFavoriteSongs (solo TX, sin S2C): agrega canciones a cuenta['musica']['favoritas']."""
+    return _cambiar_favoritas(con, cuerpo, True)
+
+
+def quitar_favoritas(con, seq, cuerpo):
+    """M08. C2S FF13A SendDelFavoriteSongs (solo TX, sin S2C): quita canciones de cuenta['musica']['favoritas']."""
+    return _cambiar_favoritas(con, cuerpo, False)
+
+
+def anotar_records_carrera(sala, cancion, filas, puesto):
+    """M08. Al armar el cartel FF28 (carrera.mandar_cartel): guarda por cuenta y cancion el mejor combo, la mejor
+    precision (pd) y las veces terminadas en cuenta['musica']['records']. Solo carreras terminadas (puesto != 7,
+    frame != 0xFFFFFFFF y no fallo en cero). Con RECORDS=0 no escribe nada."""
+    if not llave("RECORDS") or not cancion or not (0 < int(cancion) <= 0xFFFF):
+        return
+    clave = str(int(cancion))
+    for fr, a, c2s in filas:
+        if puesto.get(a, 7) == 7 or fr == 0xFFFFFFFF or len(c2s) < 8:
+            continue
+        con = sala.asientos.get(a)
+        usn = (con.cuenta or {}).get("usn") if con is not None else None
+        if not usn:
+            continue
+        combo = struct.unpack_from("<H", c2s, 4)[0]
+        pd = min(100, c2s[6])
+        star = min(100, c2s[7])
+        if combo == 0 and pd == 0 and star == 0:
+            continue
+
+        def actualizar(sec, combo=combo, pd=pd, star=star):
+            recs = sec.setdefault("records", {})
+            r = dict(recs.get(clave) or {})
+            r["combo"] = max(int(r.get("combo") or 0), combo)
+            r["pd"] = max(int(r.get("pd") or 0), pd)
+            r["star"] = max(int(r.get("star") or 0), star)
+            r["veces"] = min(999999, int(r.get("veces") or 0) + 1)
+            recs[clave] = r
+            return dict(r)
+
+        try:
+            nuevo = cuenta.cambiar_seccion(usn, "musica", actualizar)
+            anotar("   RECORD cancion %s de %s (usn %s): combo %d, pd %d%%, veces %d"
+                   % (clave, (con.cuenta or {}).get("nick"), usn, nuevo["combo"], nuevo["pd"], nuevo["veces"]))
+        except cuenta.CuentaError as e:
+            anotar("   ⛔ RECORD cancion %s usn %s: %s" % (clave, usn, e))
+
+
 def records_cancion(con, seq, cuerpo):
     """C2S FF139 `[u16 cancion]` (el anfitrion se para sobre una cancion del selector) -> S2C FF139 de 19 B:
-    `[u16 cancion][u8 marca][u16 a][u16 b][u32 c][u32 d][u32 e]` (layouts/FF139.md; 0xa111a0 pone a, b y min(c, 999999) en
-    pantalla). MEDIDO: las canciones nunca jugadas (10 de 13) vienen con todo en 0 menos d = 999. Nosotros no guardamos
-    records: SIEMPRE mandamos ese «sin record». HIPOTESIS: a, b, c son records personales (las jugadas traen 157/94/2, etc.)."""
+    `[u16 cancion][u8 marca][u16 combo][u16 pd][u32 veces][u32 puesto][u32 cambio]` (layouts/FF139.md; 0xa111a0 pone
+    combo, pd y min(veces, 999999) en pantalla). MEDIDO: sin record va todo en 0 menos puesto = 999 (10 de 13 del
+    oficial). M08: con RECORDS=1 y cuenta local devuelve el record guardado en cuenta['musica']['records']; marca queda
+    en 0 (sin medir en moderno) y puesto/cambio en 999/0 (sin ranking de popularidad). Con RECORDS=0 vuelve a sin record."""
     if len(cuerpo) != 2:
         return False
     cancion = struct.unpack_from("<H", cuerpo)[0]
-    con.mandar_interno(0x139, seq, struct.pack("<HBHHIII", cancion, 0, 0, 0, 0, 999, 0))
+    combo = pd = veces = 0
+    usn = (con.cuenta or {}).get("usn")
+    if llave("RECORDS") and usn and cancion:
+        try:
+            r = (cuenta.leer_seccion(usn, "musica").get("records") or {}).get(str(cancion)) or {}
+            combo = min(0xFFFF, max(0, int(r.get("combo") or 0)))
+            pd = min(100, max(0, int(r.get("pd") or 0)))
+            veces = min(999999, max(0, int(r.get("veces") or 0)))
+        except cuenta.CuentaError as e:
+            anotar("   ⛔ FF139 record cancion %d usn %s: %s" % (cancion, usn, e))
+    con.mandar_interno(0x139, seq, struct.pack("<HBHHIII", cancion, 0, combo, pd, veces, 999, 0))
     return True
 
 
@@ -1003,7 +1133,10 @@ MANEJADORES = {
     0x1F6: lista,
     0x1B: elegir_pista,
     0x79: selector,
+    0x137: canciones_favoritas,
+    0x138: agregar_favoritas,
     0x139: records_cancion,
+    0x13A: quitar_favoritas,
     0x1C: elegir_cancion,
     0x132: grupo_coop,
     0x1F5: crear,
