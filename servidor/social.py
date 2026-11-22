@@ -281,12 +281,13 @@ def proponer(con, seq, cuerpo):
         quedan = _quedan(yo)
         anillo = None if (c is None or otro is None or c["usn"] == yo) else _anillo_que_tiene(con, pedido)
         d = parejas()
+        real = pareja_real()
         with _CANDADO:
             if c is None or otro is None:
                 cod = PE_SOLO_CONECTADOS
             elif c["usn"] == yo:
                 cod = PE_A_UNO_MISMO
-            elif d.get(yo, {}).get("usn") == c["usn"]:
+            elif d.get(yo, {}).get("usn") == c["usn"] or (real and (yo in d or c["usn"] in d)):
                 cod = PE_YA_SON_PAREJA
             elif anillo is None:
                 cod = PE_SIN_ANILLO
@@ -327,18 +328,30 @@ def proponer(con, seq, cuerpo):
             anotar("   PAREJA: %s acepta a %s pero el anillo %d ya no esta: no son pareja" % (nick_yo, _nick(x), anillo))
             return True
 
+        real = pareja_real()
+        desde = time.strftime("%Y%m%d%H%M%S") if real else None
+
         def aceptar(dd):
             if dd.get(yo, {}).get("usn") == x and dd.get(x, {}).get("usn") == yo:
                 return None                                   # ya eran pareja (propuestas cruzadas): nada que escribir
+            if real and (yo in dd or x in dd):
+                return "ya_tiene"                             # M11 (PAREJA_REAL=1): ninguno puede tener pareja previa
             dejados = []                                      # (el que quedo solo, el que se fue)
             for a, b2 in ((yo, x), (x, yo)):
                 viejo = dd.pop(a, {}).get("usn")
                 if viejo and viejo != b2:
                     dd.pop(viejo, None)
                     dejados.append((viejo, a))
-                dd[a] = {"usn": b2, "anillo": anillo}
+                reg = {"usn": b2, "anillo": anillo}
+                if real:
+                    reg["desde"] = desde
+                dd[a] = reg
             return dejados
         dejados = _cambiar_parejas(aceptar)                    # las dos cuentas (y las parejas que dejan) en UN candado
+        if dejados == "ya_tiene":
+            _error_propuesta(con, seq, _quedan(yo), PE_YA_SON_PAREJA)
+            anotar("   PAREJA: %s acepta a %s pero alguno ya tiene pareja (PAREJA_REAL=1): nada escrito" % (nick_yo, _nick(x)))
+            return True
         with _CANDADO:                                         # una propuesta cruzada entre los dos ya no tiene sentido
             if _PEND.get(yo, (None,))[0] == x:
                 del _PEND[yo]
@@ -444,13 +457,18 @@ def ficha_datos(con, seq, cuerpo):
 #   pareja" ([UI+0x1568] queda en 0, leido con ReadProcessMemory). Ver docs/tablero/layouts/FF77.md, "Lectura de la ficha 78": el FF77 NO
 #   llega al campo #62 en este exe (HIPOTESIS: el tramo del manejador que vive en la cueva 0x1da649d4 lee 4 B fijos en +9 donde el
 #   oficial parece traer [L][bytes], y el resto del flujo queda desalineado). Se deja armado para cuando se arregle eso.
-LLAVES_OMISION = {"FICHA_PAREJA": "0", "PAREJA_EN_MENSAJERO": "1"}   # ficha 112: el tipo 1 prende el icono 玩伴 del mensajero (MEDIDO con 2 copias); 1 = prendido
+LLAVES_OMISION = {"FICHA_PAREJA": "0", "PAREJA_EN_MENSAJERO": "1", "PAREJA_REAL": "1"}   # ficha 112: tipo 1 prende el icono 玩伴; M11: PAREJA_REAL (sin pareja los dos + fecha `desde` en cuenta y registro97 +0x2f)
 FF77_LARGO = 566          # la plantilla del oficial: #62 es el u8 de +561 y #86 (u32 = 0) cierra los 4 ultimos bytes
 FF77_PAREJA_OFS = 561
 
 
 def llave(nombre="FICHA_PAREJA"):
     return os.environ.get(nombre, LLAVES_OMISION[nombre]) == "1"
+
+
+def pareja_real():
+    """Llave M11 (entorno PAREJA_REAL, leida en el momento, omision '1'): exige que ninguno tenga pareja al proponer/aceptar y guarda `desde`."""
+    return llave("PAREJA_REAL")
 
 
 def _fecha8(desde):
@@ -647,6 +665,14 @@ def _gbk(t, n):
     return textos.codificar(t, n)
 
 
+def _desde_pareja(usn):
+    """Texto AAAAMMDD (8 B ASCII, LEIDO 0x00871ec1 / 0x02732c60, BODA_LECTURA.md §2) de desde cuando `usn` tiene pareja (玩伴纪念日), con PAREJA_REAL=1."""
+    if not pareja_real():
+        return b""
+    d = str((parejas().get(usn) or {}).get("desde") or "")
+    return d[:8].encode("ascii") if len(d) >= 8 and d[:8].isdigit() else b""
+
+
 def registro97(tipo, usn):
     r = bytearray(97)
     r[0] = tipo
@@ -654,6 +680,10 @@ def registro97(tipo, usn):
     r[9] = 1 if _conectado(usn) else 0
     nick = _gbk(_nick(usn), 12)
     r[0xf:0xf + len(nick)] = nick
+    desde = _desde_pareja(usn)
+    if desde:
+        # M11 (LEIDO 0x00871ec1 / 0x02732c60, BODA_LECTURA.md §2): reg+0x2f = fecha AAAAMMDD -> 玩伴纪念日 (en todo registro de ese usn, como +0x3e)
+        r[0x2f:0x2f + len(desde)] = desde
     aniv = _aniversario_de(usn)
     if aniv:
         # ficha 117 (MEDIDO con el juego): reg+0x3e = fecha de la boda AAAAMMDD -> 结婚纪念日. Va en TODO registro de ese usn (tipo 1, 2 y 0): si la pareja tambien es amiga, la

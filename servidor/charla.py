@@ -13,6 +13,7 @@ esta en el lobby.
 import os
 import struct
 
+import cupon
 import estado
 import gm
 import salas
@@ -102,6 +103,8 @@ def hablar(con, seq, cuerpo):
     texto = cuerpo[2:130].split(b"\0", 1)[0]
     if gm.atender(con, texto):
         return True
+    if cupon.atender(con, texto):
+        return True
     sala = estado.SALAS.get(con.sala)
     destinos = salas.jugadores(sala) if sala is not None else list(estado.CONEXIONES.values())
     r = registro(con, cuerpo).ljust(592, b"\0")
@@ -135,6 +138,8 @@ def hablar_en_carrera(con, seq, cuerpo):
         return False
     texto = cuerpo[1:].split(b"\0", 1)[0]
     if gm.atender(con, texto):
+        return True
+    if cupon.atender(con, texto):
         return True
     sala = de_la_sala(con)
     if sala is None:
