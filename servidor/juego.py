@@ -50,7 +50,9 @@ manejadores_al_dia = recarga.revisar
 PUERTOS = list(ajustes.PUERTOS_JUEGO)          # ajustes.py: variable PUERTOS_JUEGO
 # 29-oct: y el puerto de cada cuenta LOCAL (cuentas.py): la lista de canales que les da login.py apunta ahi, y por el
 # puerto se sabe QUE cuenta se conecta (su FF02 de 168 B viene cifrado). CUENTAS_LOCALES=0 los apaga.
-if ajustes.CUENTAS_LOCALES:
+# M01b (22-nov): con IDENTIDAD_FF02 (modo pase) todos entran por el puerto compartido y la cuenta sale del FF02: los puertos
+# por cuenta ya no se abren (el login no los anuncia mas).
+if ajustes.CUENTAS_LOCALES and not cuentas.identidad_ff02():
     PUERTOS += [p for p in cuentas.PUERTOS if p not in PUERTOS]
 HOSTS = ajustes.HOSTS
 AQUI = ajustes.AQUI
