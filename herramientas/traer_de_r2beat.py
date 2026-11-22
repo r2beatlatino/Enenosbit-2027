@@ -8,9 +8,10 @@ r"""traer_de_r2beat — lleva el server de D:\R2Beat\servidor_local (o de un wor
         --mensaje "M01: cuentas sin tope" [--merge]
         rama nueva desde origin/develop → copia → guardia → commit → push → PR contra develop (→ merge)
 
-QUÉ VIAJA: lo de `vps/archivos_que_viajan.txt` del ORIGEN, más todos los `servidor/*.py`, para que un módulo nuevo
-no se quede atrás. Las carpetas de la lista (`datos/charts/`…) se copian ESPEJADAS: lo que ya no está en el origen,
-se borra acá. Un `servidor/*.py` que ya no está en el origen también se borra.
+QUÉ VIAJA: lo de `vps/archivos_que_viajan.txt` del ORIGEN. Las carpetas de la lista (`datos/charts/`…) se copian
+ESPEJADAS: lo que ya no está en el origen, se borra acá. Un `servidor/*.py` que ya no está en el origen también se
+borra. ⛔ Frena si un `servidor/*.py` del origen NO está en la lista, o si el repo tiene algún archivo fuera de ella
+(salvo LEEME.md, .gitignore y herramientas/): el guardia SÓLO revisa lo de la lista, y eso no se sube sin revisar.
 
 ⛔ EL PUSH SÓLO DESPUÉS DEL GUARDIA EN 0. Las capturas para comparar están en la copia principal de D:\R2Beat (no en
    los worktrees, porque git las ignora): `--capturas` apunta ahí por omisión.
@@ -48,12 +49,27 @@ def lista(desde):
         linea = linea.strip()
         if linea and not linea.startswith("#"):
             entradas.append(linea.replace("\\", "/"))
-    for p in sorted((desde / "servidor").glob("*.py")):
-        rel = f"servidor/{p.name}"
-        if rel not in entradas:
-            print(f"   ⚠ {rel} no está en archivos_que_viajan.txt: viaja igual (todos los .py de servidor/ viajan)")
-            entradas.append(rel)
+    faltan = [f"servidor/{p.name}" for p in sorted((desde / "servidor").glob("*.py"))
+              if f"servidor/{p.name}" not in entradas]
+    if faltan:
+        # el guardia SÓLO revisa lo de la lista: un .py fuera de ella se subiría sin revisar
+        sys.exit(f"⛔ {', '.join(faltan)} no está(n) en vps/archivos_que_viajan.txt del origen: agregalo(s) ahí "
+                 "(si no, el guardia no lo revisa y la imagen no lo lleva)")
     return entradas
+
+
+PROPIOS = {"LEEME.md", ".gitignore"}            # del repo, no del server: no pasan por el guardia
+
+
+def fuera_de_lista(entradas):
+    """Todo archivo que git subiría y el guardia NO revisa. Tiene que dar vacío."""
+    r = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard"], cwd=REPO,
+                       capture_output=True, text=True, encoding="utf-8")
+    archivos = [x for x in r.stdout.splitlines() if x and (REPO / x).exists()]
+    sueltos = {e for e in entradas if not e.endswith("/")} | {"vps/guardia_datos.py"}
+    carpetas = tuple(e for e in entradas if e.endswith("/"))
+    return [x for x in archivos if x not in sueltos and not x.startswith(carpetas)
+            and x not in PROPIOS and not x.startswith("herramientas/")]
 
 
 def copiar(a, b, cambios):
@@ -130,11 +146,16 @@ def main():
         git("checkout", "-q", "-B", a.rama, f"origin/{a.base}")
 
     print(f"▶ {desde} → {REPO}")
-    cambios, borrados = espejar(desde, lista(desde))
+    entradas = lista(desde)
+    cambios, borrados = espejar(desde, entradas)
     print(f"   {len(cambios)} archivo(s) nuevos o cambiados, {len(borrados)} borrado(s)")
     for x in (cambios + [f"(borrado) {b}" for b in borrados])[:40]:
         print(f"     {x}")
 
+    sueltos = fuera_de_lista(entradas)
+    if sueltos:
+        sys.exit(f"⛔ {len(sueltos)} archivo(s) del repo que el guardia NO revisa (no están en archivos_que_viajan.txt):"
+                 f" {', '.join(sueltos[:10])} — sacalos o agregalos a la lista. Nada se sube.")
     if guardia(desde, a.capturas) != 0:
         sys.exit("⛔ el guardia NO dio 0: nada se sube. Revisar lo que marcó (sin imprimir contenidos).")
     if not a.publicar:
