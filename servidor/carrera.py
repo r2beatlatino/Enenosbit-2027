@@ -478,6 +478,10 @@ def mandar_cartel(numero, motivo):
         boda.tras_carrera(sala, puesto)          # ficha 112: las misiones de la boda (llave BODA; solo parejas con la boda en estado 4)
     except Exception as e:                                                   # noqa: BLE001
         anotar("   ⛔ boda.tras_carrera: %r" % e)
+    try:
+        salas.anotar_records_carrera(sala, car.get("cancion"), filas, puesto)   # M08: record propio por cancion (llave RECORDS)
+    except Exception as e:                                                   # noqa: BLE001
+        anotar("   ⛔ salas.anotar_records_carrera: %r" % e)
     for nick, cuenta in sorted(car.get("subs", {}).items(), key=lambda x: str(x[0])):
         anotar("      FF26 de %s por sub: %s" % (nick, " ".join("%02x:%d" % kv for kv in sorted(cuenta.items()))))
     for nick, ti in sorted(car.get("golpes", {}).items(), key=lambda x: str(x[0])):
