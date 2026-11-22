@@ -13,6 +13,7 @@ servidor/cuentas.py
 servidor/estado.py
 servidor/fichas.py
 servidor/gemas.py
+servidor/gm.py
 servidor/granja.py
 servidor/jardin.py
 servidor/juego.py
