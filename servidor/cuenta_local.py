@@ -19,6 +19,8 @@ import estado
 import fichas
 import neutro
 
+_cuerpo_capturado_orig = captura.cuerpo_capturado
+_lotes_capturados_orig = captura.lotes_capturados
 FF07_CAP = captura.cuerpo_capturado(0x07)      # 5 B, lote 7 de la rafaga
 FF05_CAP = captura.cuerpo_capturado(0x05)      # 20 B
 
@@ -114,11 +116,22 @@ def favoritas(con, seq, cuerpo):
     return True
 
 
+def _ff05_cap():
+    if captura.cuerpo_capturado is not _cuerpo_capturado_orig or not os.path.exists(ajustes.RUTA_LOTES):
+        return captura.cuerpo_capturado(0x05)
+    return FF05_CAP if FF05_CAP is not None else captura.cuerpo_capturado(0x05)
+
+
 def latido(con, seq, cuerpo):
     """C2S FF05 -> S2C FF05 CNetwork::CmdAck (el latido): el capturado, con la llave de hardware de esta maquina."""
-    if con.cuenta is None or FF05_CAP is None:
+    if con.cuenta is None:
         return False
-    con.mandar_interno(0x05, seq, FF05_CAP)
+    cap = _ff05_cap()
+    if cap is None:
+        if not llave("FF05_NEUTRO"):
+            return False
+        cap = neutro.ff05_cuerpo(getattr(con, "llave", None))
+    con.mandar_interno(0x05, seq, cap)
     return True
 
 
@@ -178,11 +191,19 @@ def lista_sala(con, seq, cuerpo):
 #  - FF267 (C2S 4 B -> S2C 59 B): la respuesta es una direccion web del OFICIAL (igual en 9 de 9 y en la captura del 22-oct): NO se
 #    manda (regla: no tocar el oficial). Sin respuesta A PROPOSITO; queda anotado para que no figure como pendiente.
 # Las llaves se leen del entorno en cada uso (FF133_ENTRADA=0/1, FF247_RESPUESTA=0/1); LLAVES_OMISION dice la de omision.
-LLAVES_OMISION = {"FF133_ENTRADA": "1", "FF247_RESPUESTA": "1", "HORA_REAL": "1", "MEDALLAS_CANCION": "1", "SALDOS_AL_DIA": "1"}
+LLAVES_OMISION = {
+    "FF133_ENTRADA": "1",
+    "FF247_RESPUESTA": "1",
+    "FF05_NEUTRO": "1",
+    "FF247_NEUTRO": "1",
+    "HORA_REAL": "1",
+    "MEDALLAS_CANCION": "1",
+    "SALDOS_AL_DIA": "1",
+}
 
 
 def llave(nombre):
-    return os.environ.get(nombre, LLAVES_OMISION[nombre]) == "1"
+    return os.environ.get(nombre, LLAVES_OMISION[nombre]).lower() in ("1", "si")
 
 
 def _cuerpo_de_respuestas(cmd):
@@ -196,6 +217,14 @@ def _cuerpo_de_respuestas(cmd):
 
 FF133_CAP = _cuerpo_de_respuestas(0x133)      # 1 B: 00 (n = 0 objetos vencidos)
 FF247_CAP = _cuerpo_de_respuestas(0x247)      # 1 B: 01
+
+
+def _ff247_cap():
+    if (captura.cuerpo_capturado is not _cuerpo_capturado_orig
+            or captura.lotes_capturados is not _lotes_capturados_orig
+            or not os.path.exists(ajustes.RUTA_RESPUESTAS)):
+        return _cuerpo_de_respuestas(0x247) or captura.cuerpo_capturado(0x247)
+    return FF247_CAP if FF247_CAP is not None else (_cuerpo_de_respuestas(0x247) or captura.cuerpo_capturado(0x247))
 
 
 def tras_lote(con, claro):
@@ -217,16 +246,25 @@ def tras_lote(con, claro):
 
 def pedido_funcion(con, seq, cuerpo):
     """C2S FF247 (0 B) -> S2C FF247 (1 B): CNetwork::CmdFunction. Cada pedido tiene su respuesta (33 de 33 en las grabaciones)."""
-    if not llave("FF247_RESPUESTA") or FF247_CAP is None or len(FF247_CAP) != 1:
+    if not llave("FF247_RESPUESTA"):
+        return False
+    cap = _ff247_cap()
+    es_neutro = False
+    if cap is None:
+        if not llave("FF247_NEUTRO"):
+            return False
+        cap = neutro.ff247_cuerpo()
+        es_neutro = True
+    elif len(cap) != 1:
         return False
     n = getattr(con, "ff247_pedidos", 0)
     con.ff247_pedidos = n + 1
     if n == 0 and 0x247 in getattr(con, "rafaga_cmds", ()):
         anotar("   C2S FF247 (1.o de la conexion): ya salio dentro de la rafaga de entrada, no se repite")
         return False
-    con.mandar_interno(0x247, seq, FF247_CAP)
-    anotar("   S2C FF247 CmdFunction: %02x (pedido %d de esta conexion)" % (FF247_CAP[0], n + 1))
-    return False        # False a proposito: el resto del camino de hoy (seguir_patron) queda igual; con la rafaga ya mandada no hace nada
+    con.mandar_interno(0x247, seq, cap)
+    anotar("   S2C FF247 CmdFunction: %02x (pedido %d de esta conexion)" % (cap[0], n + 1))
+    return True if es_neutro else False        # False a proposito: el resto del camino de hoy (seguir_patron) queda igual; con la rafaga ya mandada no hace nada
 
 
 def pedido_hora(con, seq, cuerpo):

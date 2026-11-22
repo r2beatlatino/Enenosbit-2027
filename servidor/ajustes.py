@@ -37,7 +37,7 @@ def numero_capturado(ruta, cmd, desplazamiento, omision=0):
 AQUI = os.path.dirname(os.path.abspath(__file__))            # servidor_local/servidor/
 BASE = os.path.dirname(AQUI)                                  # servidor_local/
 DATOS = os.path.join(BASE, "datos")                           # lo preparado por herramientas/preparar_*.py (y cuenta.json)
-REGISTROS = os.path.join(BASE, "registros")                   # lo que se anota (juego_*.txt, login_*.txt, recarga.json)
+REGISTROS = os.environ.get("RECARGA_REGISTROS") or os.path.join(BASE, "registros")   # lo que se anota (juego_*.txt, login_*.txt, recarga.json)
 
 RUTA_CAP_JUEGO = os.path.join(DATOS, "juego_S2C.bin")         # copia de tools/net/volcado_28008_S2C.bin (FF04/FF02 del oficial)
 RUTA_LOTES = os.path.join(DATOS, "lotes_S2C.bin")             # los 60 lotes de la sesion del 22-oct, ya descifrados
@@ -95,6 +95,7 @@ CMDLOGIN_SIEMPRE = os.environ.get("CMDLOGIN_SIEMPRE") == "1"  # CMDLOGIN_SIEMPRE
 LISTA_A_MANO = os.environ.get("LISTA_A_MANO") == "1"          # LISTA_A_MANO=1: lista de canales armada a mano en vez de la capturada
 SIN_CANAL_BAILE = os.environ.get("SIN_CANAL_BAILE") == "1"    # SIN_CANAL_BAILE=1: saca el canal 0x28 (tipo 0x0d, 竞舞) del FF03 para abrir Modo Baile en el principal (apagada por omision: cambia bytes de la captura)
 PASE = (os.environ.get("PASE") or "").strip().lower() in ("si", "1")   # PASE=si: exige pase Ed25519 de Cuenta Eñeños en el FF01 (apagada por omision)
+IDENTIDAD_FF02 = (os.environ.get("IDENTIDAD_FF02") or "si").strip().lower() in ("si", "1")   # IDENTIDAD_FF02=si: en modo PASE identifica por C2S FF02 de juego y sin tope de 8 cuentas (0 vuelve a puerto por cuenta)
 R2_PASE_JUEGO = (os.environ.get("R2_PASE_JUEGO") or "").strip() or "r2beat-moderno"   # R2_PASE_JUEGO: `aud` esperado en el pase
 R2_CUENTAS_CLAVE_PUBLICA = (os.environ.get("R2_CUENTAS_CLAVE_PUBLICA") or "").strip()   # R2_CUENTAS_CLAVE_PUBLICA: JWK/JWKS/hex/b64u Ed25519
 R2_CUENTAS_URL = (os.environ.get("R2_CUENTAS_URL") or "").strip()   # R2_CUENTAS_URL: URL base de Cuenta Eñeños (solo al arrancar si falta la clave)
@@ -104,6 +105,17 @@ R2_CUENTAS_URL = (os.environ.get("R2_CUENTAS_URL") or "").strip()   # R2_CUENTAS
 def pase_activo():
     """PASE=si (o 1): True si el modo pase esta encendido en este momento."""
     return (os.environ.get("PASE") or "").strip().lower() in ("si", "1")
+
+
+def identidad_ff02():
+    """IDENTIDAD_FF02=si (omision si): True si pase_activo() y la llave esta prendida en este momento."""
+    if not pase_activo():
+        return False
+    if "IDENTIDAD_FF02" in os.environ:
+        return (os.environ.get("IDENTIDAD_FF02") or "si").strip().lower() in ("si", "1")
+    return bool(IDENTIDAD_FF02)
+
+
 def puerto_juego():
     """PUERTO_JUEGO: el puerto de juego que el login pone en la lista armada a mano (28008 si no se fijo)."""
     return int(os.environ.get("PUERTO_JUEGO", "28008"))

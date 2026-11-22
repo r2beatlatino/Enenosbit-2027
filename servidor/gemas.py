@@ -59,9 +59,11 @@ def tabla():
     """{codigo(int): shopIndexList} de las gemas. {} si no hay tabla (entonces no se atiende nada)."""
     if _TABLA:
         return _TABLA
-    for ruta in _RUTAS:
+    rutas = list(_RUTAS) + [os.path.join(ajustes.carpeta_cuenta(), "gemas_tablas.json")]
+    for ruta in rutas:
         try:
-            j = json.load(open(ruta, encoding="utf-8"))
+            with open(ruta, encoding="utf-8") as f:
+                j = json.load(f)
         except (OSError, ValueError):
             continue
         if isinstance(j, dict) and "gemas" in j:
@@ -119,6 +121,13 @@ def cuerpo_272(objetos):
         g = objetos[ob]
         out += struct.pack("<II", ob, len(g)) + b"".join(struct.pack("<I", x) for x in g)
     return out
+
+
+def cuerpo(cuenta):
+    """Cuerpo S2C FF272 para esta cuenta local, o None si el modulo esta apagado o no hay cuenta."""
+    if not llave() or not cuenta or not cuenta.get("usn"):
+        return None
+    return cuerpo_272(objetos_de(cuenta["usn"]))
 
 
 def cuerpo_273_ok(objeto, gema):

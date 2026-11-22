@@ -420,7 +420,7 @@ def temprano_120(con, seq, cuerpo):
 
 
 def _vivo(c):
-    return estado.CONEXIONES.get(getattr(c, "puerto", None)) is c
+    return estado.CONEXIONES.get(getattr(c, "id_con", None)) is c
 
 
 def _adentro(usn_d):
