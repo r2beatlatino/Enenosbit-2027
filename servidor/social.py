@@ -1003,8 +1003,19 @@ def llave_m10(nombre):
 
 
 def cartel_megafono(item, nick_gbk, texto):
-    """S2C FF40 [12][u32 item][u8 L][quien][u8 L][texto]. HIPOTESIS: la forma del 2013 (ver el bloque de arriba)."""
-    return (bytes([0x12]) + struct.pack("<I", item) + bytes([len(nick_gbk)]) + nick_gbk + bytes([len(texto)]) + texto)
+    """S2C FF40 [0D][u32 item][u8 L1][quien (L1 <= 13)][u8 L2][texto][u8 extra=0]. LEIDO en el exe moderno (M10b, 22-nov,
+    un testigo: lectura estatica): sub 0x0D @ 0x027a089f es el cartel del megafono; `extra` 0 -> arg4 0 de 0x00980e40.
+    ⚠ L1 >= 14 hace __report_rangecheckfailure en el cliente (0x027a08d9): el apodo se corta a 13 B aca tambien."""
+    nick_gbk = nick_gbk[:13]
+    texto = texto[:255]
+    return (bytes([0x0D]) + struct.pack("<I", item) + bytes([len(nick_gbk)]) + nick_gbk + bytes([len(texto)]) + texto
+            + bytes([0]))
+
+
+def acuse_megafono(item, ok=True):
+    """S2C FF40 [0C][u8 res][u32 item] al que lo mando (M10b: res 1 = 'mensaje enviado' y el cliente descuenta 1 carga
+    del item en SU mochila, 0x00473e50; res 2 = 'usa un lenguaje respetuoso')."""
+    return bytes([0x0C, 1 if ok else 2]) + struct.pack("<I", item)
 
 
 def megafono(con, seq, cuerpo):
@@ -1038,6 +1049,10 @@ def megafono(con, seq, cuerpo):
             n += 1
         except Exception as e:                                       # noqa: BLE001
             anotar("   ⛔ megafono: una conexion no recibio el cartel: %r" % e)
+    try:
+        con.mandar_interno(0x40, seq, acuse_megafono(item))
+    except Exception as e:                                           # noqa: BLE001
+        anotar("   ⛔ megafono: sin acuse al que lo mando: %r" % e)
     anotar("   MEGAFONO de %s (item %d, le quedan %d) -> %d conexion(es)" % (nick, item, quedan, n))
     return True
 
