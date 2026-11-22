@@ -57,8 +57,13 @@ def llave(nombre="MISIONES_PROPIAS"):
 def cargar(ruta=None):
     """(Re)lee las tablas. Si falla deja None y avisa una sola vez."""
     global _tablas, _avisado
+    candidata = ruta or RUTA
+    if ruta is None and not os.path.exists(candidata):
+        alt = os.path.join(ajustes.carpeta_cuenta(), "progresion_tablas.json")
+        if os.path.exists(alt):
+            candidata = alt
     try:
-        with open(ruta or RUTA, "r", encoding="utf-8") as f:
+        with open(candidata, "r", encoding="utf-8") as f:
             _tablas = json.load(f)
         _avisado = False
     except (OSError, ValueError):

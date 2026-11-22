@@ -12,7 +12,8 @@ import asyncio
 import itertools
 import sys
 
-CONEXIONES = {}            # puerto -> la conexion (juego.Juego) viva de ese puerto
+CONEXIONES = {}            # id_con -> la conexion (juego.Juego) viva
+NUMEROS_DE_CONEXION = itertools.count(1)
 SALAS = {}                 # numero de sala -> Sala (abajo)
 NUMEROS_DE_SALA = itertools.count(1)
 CERRADAS = {}              # numero de sala -> hora en que se cerro (salas.numero_libre no lo reusa enseguida)

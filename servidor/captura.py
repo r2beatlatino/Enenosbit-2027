@@ -99,8 +99,9 @@ def _aes_cbc_descifrar(clave, iv, datos):
     return bytes(out)
 
 
-def llave_de_c2s_ff02(cuerpo):
-    """Extrae la llave de hardware que manda el exe en C2S FF02 (0x02762c80 -> cifrado AES 0x028a6970). None si no vale."""
+def leer_c2s_ff02_juego(cuerpo):
+    """Descifra y lee el C2S FF02 del puerto de juego (0x02762c80 -> cifrado AES 0x028a6970).
+    Devuelve {"gsn", "usn", "s1", "s2", "s3", "llave", "s4", "sesion_id"} o None si no tiene la forma."""
     if len(cuerpo) < 32 or cuerpo[-4:] != b"\xfe\xcd\xdf\xbd":
         return None
     n = struct.unpack_from("<I", cuerpo, len(cuerpo) - 8)[0]
@@ -108,19 +109,45 @@ def llave_de_c2s_ff02(cuerpo):
     if n < 25 or m + 16 > len(cuerpo):
         return None
     pt = _aes_cbc_descifrar(CLAVE_AES_FF02, IV_AES_FF02, cuerpo[:m])[:n]
+    gsn, usn = struct.unpack_from("<II", pt, 0)
     off = 13
+    cadenas = []
     for _ in range(3):
         if off >= n:
             return None
-        off += 1 + pt[off]
+        largo = pt[off]
+        off += 1
+        if off + largo > n:
+            return None
+        cadenas.append(pt[off:off + largo].decode("ascii", errors="replace"))
+        off += largo
     if off + 5 > n:
         return None
     cruda = struct.unpack_from("<I", pt, off)[0]
     off += 4
     l4 = pt[off]
-    if off + 1 + l4 + 4 != n:
+    off += 1
+    if off + l4 + 4 != n:
         return None
-    return cruda ^ 0xCCCCCCCC
+    s4 = pt[off:off + l4].decode("ascii", errors="replace")
+    off += l4
+    sesion_id = struct.unpack_from("<I", pt, off)[0]
+    return {
+        "gsn": gsn,
+        "usn": usn,
+        "s1": cadenas[0],
+        "s2": cadenas[1],
+        "s3": cadenas[2],
+        "llave": cruda ^ 0xCCCCCCCC,
+        "s4": s4,
+        "sesion_id": sesion_id,
+    }
+
+
+def llave_de_c2s_ff02(cuerpo):
+    """Extrae la llave de hardware que manda el exe en C2S FF02 (0x02762c80 -> cifrado AES 0x028a6970). None si no vale."""
+    d = leer_c2s_ff02_juego(cuerpo)
+    return d["llave"] if d is not None else None
 
 
 # ---------- mensajes con el encuadre [largo:u32][claro] y marcos de adentro de un FF56 ----------

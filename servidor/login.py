@@ -48,6 +48,7 @@ import struct
 import time
 
 import ajustes
+import cuenta
 import cuentas
 import pase
 import textos
@@ -572,7 +573,9 @@ def _registrar_sesion(gsn, usuario, clave, sesion_id):
         del _SESIONES[k]
     if len(_SESIONES) >= MAX_SESIONES:
         del _SESIONES[min(_SESIONES, key=lambda k: _SESIONES[k]["expira"])]
-    _SESIONES[int(gsn)] = {"clave": clave, "sesion_id": int(sesion_id), "usuario": usuario, "expira": ahora + SESION_TTL}
+    datos = {"clave": clave, "sesion_id": int(sesion_id), "usuario": usuario, "expira": ahora + SESION_TTL}
+    _SESIONES[int(gsn)] = datos
+    cuenta.guardar_sesion(int(gsn), datos)
 
 
 def _validar_sesion(gsn, clave, sesion_id):
@@ -686,10 +689,11 @@ class Login(asyncio.Protocol):
             self.tr.write(marco(0x02, seq, r))
             anotar("   S2C FF02 CmdLogin (capturada, usn %d): %d bytes" % (usn, len(r)))
         else:
-            self.puerto_destino = u["puerto"]
+            puerto_dest = ajustes.PUERTOS_JUEGO[0] if cuentas.identidad_ff02() else u["puerto"]
+            self.puerto_destino = puerto_dest
             r = cmdlogin_para(usn)
             self.tr.write(marco(0x02, seq, r))
-            anotar("   S2C FF02 CmdLogin (usn %d -> puerto %d): %d bytes" % (usn, u["puerto"], len(r)))
+            anotar("   S2C FF02 CmdLogin (usn %d -> puerto %d): %d bytes" % (usn, puerto_dest, len(r)))
         return True
 
     def _enviar_lista_puerto(self, seq, puerto_dest):
@@ -759,15 +763,17 @@ class Login(asyncio.Protocol):
                 anotar("   ⛔ S2C FF0C GetNewUSN rechazado: gsn %d ya tiene %d personajes" % (gsn, cuentas.MAX_PERSONAJES))
                 return
             self.usuario = cuentas.usuario_por_gsn(self.usuario["gsn"]) or self.usuario
-            self.puerto_destino = self.usuario["puerto"]
+            puerto_dest = ajustes.PUERTOS_JUEGO[0] if cuentas.identidad_ff02() else self.usuario["puerto"]
+            self.puerto_destino = puerto_dest
             self.tr.write(marco(0x0C, seq, struct.pack("<BII", 0, gsn, usn)))
-            anotar("   S2C FF0C CmdGetNewUSN: gsn %d -> usn %d (puerto %d)" % (gsn, usn, self.usuario["puerto"]))
+            anotar("   S2C FF0C CmdGetNewUSN: gsn %d -> usn %d (puerto %d)" % (gsn, usn, puerto_dest))
             return
         if cmd == 0x03:
             if self.usuario is None or self.puerto_destino is None:
                 self._cerrar("FF03 sin personaje elegido ni sesion")
                 return
-            self._enviar_lista_puerto(seq, self.puerto_destino)
+            puerto_dest = ajustes.PUERTOS_JUEGO[0] if cuentas.identidad_ff02() else self.puerto_destino
+            self._enviar_lista_puerto(seq, puerto_dest)
             return
         anotar("   (sin respuesta todavia) %s" % cuerpo[:48].hex())
 

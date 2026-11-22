@@ -373,7 +373,7 @@ def lotes_de_entrada(lotes, cuenta):
     """La rafaga de entrada de una conexion: los lotes capturados con la lista de canciones recortada y, en una cuenta LOCAL,
     con SU ficha FF00 (los que no se pueden armar se sacan) y SU ropa en el FF7F. Mismo orden que los capturados.
     Si falta lotes_S2C.bin, usa la rafaga neutra de neutro.py."""
-    if not lotes and not os.path.exists(ajustes.RUTA_LOTES):
+    if not lotes and (not os.path.exists(ajustes.RUTA_LOTES) or not captura.lotes_capturados(1)):
         return neutro.lotes_entrada(cuenta)
     lic = ((cuenta or {}).get("personaje") or {}).get("licencia") if cuenta is not None else None
     if ajustes.LISTA_CANCIONES and JUGABLES:

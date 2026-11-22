@@ -217,6 +217,9 @@ def _asiento_anfitrion(sala):
 def ff15_para(cuerpo, sala):
     """FF15 RoomInfo grabado: el titulo va en el byte 15 (u8 largo + GBK) y el modo, como `[u16 modo] 0400`, mas
     adelante (el mismo par que el FF10)."""
+    if cuerpo is None and os.environ.get("FF15_NEUTRO", "1").lower() in ("1", "si"):
+        anotar("   FF15 sin plantilla: armado por campos (neutro.ff15_sala)")
+        return neutro.ff15_sala(sala)
     n = cuerpo[15]
     resto = cuerpo[16 + n:]
     i = resto.find(b"\x12\x00\x04\x00")
