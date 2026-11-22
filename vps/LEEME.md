@@ -49,6 +49,10 @@ La lista exacta para copiar esta en [`archivos_que_viajan.txt`](archivos_que_via
 | `MUSICA_2013` | `1` (omision en `arrancar.sh` y `Dockerfile`) | Catalogo 2013 de `datos/musica_2013` (ficha 179). SOLO con el cliente que trae `rnr_musica2013.pak` y `rnr_music2013_*.pak`: con uno viejo, 9 canciones lo cierran |
 | `SIN_CANAL_BAILE` | `1` (omision) | Modo Baile abre en el servidor de siempre (ficha 175) |
 | `GESTOS_TODOS` | `1` (omision) | Palabras de gesto de todos los idiomas (ficha 133) |
+| `R2_CUENTAS_FICHA_INTERNA` | `<secreto compartido>` | Ficha interna del Coordinador para `/interno/panel/*` (sin esta variable y `PANEL_PUERTO`, el panel interno no se abre) |
+| `PANEL_PUERTO` | `28191` (ejemplo) | Puerto HTTP del panel interno («contrato1») dentro de `juego.py`. **Solo red interna: NO poner en `ports:` del compose** |
+| `PANEL_HOST` | `0.0.0.0` (omision) | Interfaz donde escucha el panel interno (`127.0.0.1` o red privada del contenedor) |
+| `PANEL_ENTORNO` | `test` (omision) | Nombre del entorno que informa `GET /interno/panel/capacidades` (`test` o `live`) |
 
 Opcional: `R2_CUENTAS_URL` si no se pasa `R2_CUENTAS_CLAVE_PUBLICA` (consulta `/clave-publica` una sola vez al arrancar).
 
@@ -59,6 +63,7 @@ Con `IDENTIDAD_FF02=si` (por omision en modo `PASE=si`) solo hacen falta `28004`
 - `28004/tcp` (login)
 - `28008/tcp` (juego)
 - `28101-28109/tcp` (opcionales con la llave prendida; pueden quedar abiertos sin dano)
+- `PANEL_PUERTO` **NO** se abre al exterior ni va en `ports:` del compose: es solo para la red interna con el Coordinador.
 
 ## 4. Como armar y arrancar en Linux
 

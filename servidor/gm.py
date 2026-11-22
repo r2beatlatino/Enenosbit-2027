@@ -25,7 +25,7 @@ import salas
 import textos
 
 REMITENTE_GM = "GM"
-COMANDOS = ("anuncio", "expulsar", "silenciar", "desilenciar")
+COMANDOS = ("anuncio", "expulsar", "silenciar", "desilenciar", "cupon_nuevo")
 MINUTOS_MAX = 525600.0            # 1 anio: cota razonable contra numeros absurdos
 
 # Reloj del modulo (las pruebas lo reemplazan para vencer silencios sin esperar).
@@ -260,6 +260,35 @@ def _cmd_desilenciar(con, quien, args):
     return True
 
 
+def _cmd_cupon_nuevo(con, quien, args):
+    import cupon
+    if len(args) < 2:
+        anotar("   GM %s | .cupon_nuevo | argumentos incompletos" % quien)
+        _avisar_uno(con, "uso: .cupon_nuevo <codigo> <g> [usos]")
+        return True
+    codigo = args[0]
+    try:
+        g = int(args[1])
+        usos = int(args[2]) if len(args) >= 3 else 0
+    except ValueError:
+        anotar("   GM %s | .cupon_nuevo | numeros invalidos (%r)" % (quien, args[1:]))
+        _avisar_uno(con, "uso: .cupon_nuevo <codigo> <g> [usos]")
+        return True
+    if g <= 0 or usos < 0:
+        anotar("   GM %s | .cupon_nuevo | fuera de rango g=%d usos=%d" % (quien, g, usos))
+        _avisar_uno(con, "uso: .cupon_nuevo <codigo> <g> [usos] (g > 0, usos >= 0)")
+        return True
+    try:
+        k, _regla = cupon.crear(codigo, g=g, usos_max=usos)
+    except ValueError as e:
+        anotar("   GM %s | .cupon_nuevo | %r -> %s" % (quien, codigo, e))
+        _avisar_uno(con, "cupon_nuevo: %s" % e)
+        return True
+    anotar("   GM %s | .cupon_nuevo | %s (+%d G, usos_max=%d)" % (quien, k, g, usos))
+    _avisar_uno(con, "cupon creado: %s (+%d G, usos %s)" % (k, g, usos if usos else "sin tope"))
+    return True
+
+
 def atender(con, texto):
     """Enganche unico para el camino del chat (FF1F4 y FF08). Devuelve True si se atendio como comando de GM o se
     bloqueo por silencio (el llamador no sigue ni difunde); False si sigue como chat normal."""
@@ -283,6 +312,11 @@ def atender(con, texto):
                 return _cmd_silenciar(con, quien, partes[1:])
             if cmd == "desilenciar":
                 return _cmd_desilenciar(con, quien, partes[1:])
+            if cmd == "cupon_nuevo":
+                import cupon
+                if not cupon.activo():
+                    return False
+                return _cmd_cupon_nuevo(con, quien, partes[1:])
     if esta_silenciado(con):
         anotar("   GM silencio: chat bloqueado de %s" % _quien_de(con))
         return True

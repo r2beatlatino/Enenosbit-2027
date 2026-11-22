@@ -36,6 +36,7 @@ import estado
 import fichas
 import manejadores
 import neutro
+import panel_interno
 import recarga
 
 SESION_TTL = 86_400
@@ -314,6 +315,7 @@ class Juego(asyncio.Protocol):
         self.pidio_sala = 0      # hora (time.time) del ultimo FF15 que pidio (salas.info); carrera.revisar la compara con la vuelta del coop
         self.turno = {}          # responder_por_id: cuantas veces se uso cada respuesta capturada, {(metodo, canal): n}
         self.intento_mision = None   # misiones.py: el intento de mision en curso (dict: usn, familia, codigo, t0, ...)
+        self.t_conexion = time.time()
 
     def connection_made(self, tr):
         self.tr = tr
@@ -623,6 +625,7 @@ async def main():
         for p in PUERTOS:
             await asyncio.get_running_loop().create_server(lambda p=p: Juego(p), h, p)
             anotar("escuchando en %s:%d" % (h, p))
+    await panel_interno.iniciar(anotar)
     await asyncio.Event().wait()
 
 

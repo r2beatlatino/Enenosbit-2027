@@ -10,6 +10,8 @@ servidor/correo.py
 servidor/cuenta.py
 servidor/cuenta_local.py
 servidor/cuentas.py
+servidor/cupon.py
+servidor/panel_interno.py
 servidor/estado.py
 servidor/fichas.py
 servidor/gemas.py
