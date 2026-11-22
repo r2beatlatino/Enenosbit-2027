@@ -1,0 +1,21 @@
+{
+"archivos": {
+"farmpet.xml": {
+"bytes": 38355,
+"md5": "c9688817c900a7f7e7e0ffeeedd55368"
+},
+"farmquest.txt": {
+"bytes": 141935,
+"md5": "0aaf8439a9dc9e01508a3f18fa7776d4"
+},
+"farmshop.txt": {
+"bytes": 34817,
+"md5": "b25d349ebf49430edc4e66001d8da68d"
+},
+"farmtraining.xml": {
+"bytes": 1614,
+"md5": "61cfcf46a1c5c4b1d3c95682b58ed837"
+}
+},
+"pak_md5": "beae81e06e2f5b363d9600749de01177"
+}

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+<Body>
+<Farm ShopIndex="6101" Index="5000001" Name="东尼" Sell="1" Function="P" Width="1" Depth="1" Height="2" Awidth="1" Adepth="1" Ahight="3" ItemEffect="2212" Gift="0" LI="20000" Level="1" BasePet="5000001" ></Farm>
+<Farm ShopIndex="6102" Index="5000002" Name="安妮" Sell="1" Function="P" Width="1" Depth="1" Height="2" Awidth="1" Adepth="1" Ahight="3" ItemEffect="2213" Gift="0" Level="1" BasePet="5000001" CI="10000" ></Farm>
+<Farm ShopIndex="6102" Index="5000003" Name="德尼" Sell="1" Function="P" Width="1" Depth="1" Height="2" Awidth="1" Adepth="1" Ahight="3" ItemEffect="2214" Gift="0" Level="1" BasePet="5000001" CI="10000" ></Farm>
+<Farm ShopIndex="6101" Index="5000004" Name="印第安橙蛋" Sell="1" Function="P" Width="1" Depth="1" Height="2" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2130" Gift="0" LI="6000" Level="1" BasePet="5000004" ></Farm>
+<Farm ShopIndex="6102" Index="5000005" Name="印第安红蛋" Sell="1" Function="P" Width="1" Depth="1" Height="2" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2131" Gift="0" Level="1" BasePet="5000004" CI="3000" ></Farm>
+<Farm ShopIndex="6102" Index="5000006" Name="印第安黄蛋" Sell="1" Function="P" Width="1" Depth="1" Height="2" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2132" Gift="0" Level="1" BasePet="5000004" CI="3000" ></Farm>
+<Farm ShopIndex="6101" Index="5000007" Name="小可爱" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2215" Gift="0" LI="6000" Level="1" BasePet="5000007" ></Farm>
+<Farm ShopIndex="6102" Index="5000008" Name="恶魔小可爱" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2216" Gift="0" Level="1" BasePet="5000007" CI="4000" ></Farm>
+<Farm ShopIndex="6102" Index="5000009" Name="天使小可爱" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2217" Gift="0" Level="1" BasePet="5000007" CI="4000" ></Farm>
+<Farm ShopIndex="6101" Index="5000010" Name="蓝蓝兔" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2218" Gift="0" LI="15000" Level="1" BasePet="5000010" ></Farm>
+<Farm ShopIndex="6102" Index="5000011" Name="甜美兔" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2219" Gift="0" Level="1" BasePet="5000010" CI="8500" ></Farm>
+<Farm ShopIndex="6102" Index="5000012" Name="奶黄兔" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2220" Gift="0" Level="1" BasePet="5000010" CI="8500" ></Farm>
+<Farm ShopIndex="6101" Index="5000013" Name="小球球" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="1" ItemEffect="2221" Gift="0" LI="10000" Level="1" BasePet="5000013" ></Farm>
+<Farm ShopIndex="6102" Index="5000014" Name="草莓小球球" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="1" ItemEffect="2222" Gift="0" Level="1" BasePet="5000013" CI="5500" ></Farm>
+<Farm ShopIndex="6102" Index="5000015" Name="香草小球球" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="1" ItemEffect="2223" Gift="0" Level="1" BasePet="5000013" CI="5500" ></Farm>
+<Farm ShopIndex="6101" Index="5000016" Name="小方块" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2224" Gift="0" LI="6000" Level="1" BasePet="5000016" ></Farm>
+<Farm ShopIndex="6102" Index="5000017" Name="119小方块" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2225" Gift="0" Level="1" BasePet="5000016" CI="3500" ></Farm>
+<Farm ShopIndex="6102" Index="5000018" Name="110小方块" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2226" Gift="0" Level="1" BasePet="5000016" CI="3500" ></Farm>
+<Farm ShopIndex="6101" Index="5000019" Name="小蚊子" Sell="1" Function="P" Width="1" Depth="1" Height="2" Awidth="1" Adepth="1" Ahight="3" ItemEffect="2227" Gift="0" LI="12000" Level="1" BasePet="5000019" ></Farm>
+<Farm ShopIndex="6102" Index="5000020" Name="恶魔蚊子" Sell="1" Function="P" Width="1" Depth="1" Height="2" Awidth="1" Adepth="1" Ahight="3" ItemEffect="2228" Gift="0" Level="1" BasePet="5000019" CI="7000" ></Farm>
+<Farm ShopIndex="6102" Index="5000021" Name="奶油蚊子" Sell="1" Function="P" Width="1" Depth="1" Height="2" Awidth="1" Adepth="1" Ahight="3" ItemEffect="2229" Gift="0" Level="1" BasePet="5000019" CI="7000" ></Farm>
+<Farm ShopIndex="6101" Index="5000022" Name="美味糖果" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2230" Gift="0" LI="6000" Level="1" BasePet="5000022" ></Farm>
+<Farm ShopIndex="6102" Index="5000023" Name="天使糖果" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2231" Gift="0" Level="1" BasePet="5000022" CI="3000" ></Farm>
+<Farm ShopIndex="6102" Index="5000024" Name="甜美糖果" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2232" Gift="0" Level="1" BasePet="5000022" CI="3000" ></Farm>
+<Farm ShopIndex="6101" Index="5000000" Name="宠物蛋" Sell="0" Function="P" Width="1" Depth="1" Height="1" ItemEffect="2239" Gift="0" LI="9999999999" WI="9999999999" Show="0" ></Farm>
+<Farm ShopIndex="6103" Index="5000025" Name="天使安妮" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2435" Gift="0" LI="9999999999" Level="255" BasePet="5000001" WI="9999999999" ></Farm>
+<Farm ShopIndex="6103" Index="5000026" Name="印第安酋长蛋" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2436" Gift="0" LI="9999999999" Level="255" BasePet="5000004" WI="9999999999" ></Farm>
+<Farm ShopIndex="6103" Index="5000027" Name="三线小可爱" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2437" Gift="0" LI="9999999999" Level="255" BasePet="5000007" WI="9999999999" ></Farm>
+<Farm ShopIndex="6103" Index="5000028" Name="皇冠霸王兔" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2438" Gift="0" LI="9999999999" Level="255" BasePet="5000010" WI="9999999999" ></Farm>
+<Farm ShopIndex="6103" Index="5000029" Name="派对球球" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2439" Gift="0" LI="9999999999" Level="255" BasePet="5000013" WI="9999999999" ></Farm>
+<Farm ShopIndex="6103" Index="5000030" Name="机械小方块" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2440" Gift="0" LI="9999999999" Level="255" BasePet="5000016" WI="9999999999" ></Farm>
+<Farm ShopIndex="6103" Index="5000031" Name="蚊子护士" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2441" Gift="0" LI="9999999999" Level="255" BasePet="5000019" WI="9999999999" ></Farm>
+<Farm ShopIndex="6103" Index="5000032" Name="小丑糖果" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2442" Gift="0" LI="9999999999" Level="255" BasePet="5000022" WI="9999999999" ></Farm>
+<Farm ShopIndex="6101" Index="5000033" Name="卷毛" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2542" Gift="0" LI="13000" Level="1" BasePet="5000033" WI="5000" ></Farm>
+<Farm ShopIndex="6102" Index="5000034" Name="帽子卷毛" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2543" Gift="0" Level="1" BasePet="5000033" CI="8000" ></Farm>
+<Farm ShopIndex="6102" Index="5000035" Name="爱心卷毛" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2544" Gift="0" Level="1" BasePet="5000033" CI="8000" ></Farm>
+<Farm ShopIndex="6103" Index="5000036" Name="泡泡卷毛" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2545" Gift="0" LI="9999999999" Level="255" BasePet="5000033" WI="9999999999" ></Farm>
+<Farm ShopIndex="6101" Index="5000037" Name="小浣熊" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2607" Gift="0" LI="13000" Level="1" BasePet="5000037" WI="5000" New="1" ></Farm>
+<Farm ShopIndex="6102" Index="5000038" Name="明星浣熊" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2608" Gift="0" Level="1" BasePet="5000037" CI="8000" New="1" ></Farm>
+<Farm ShopIndex="6102" Index="5000039" Name="厨师浣熊" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2609" Gift="0" Level="1" BasePet="5000037" CI="8000" New="1" ></Farm>
+<Farm ShopIndex="6103" Index="5000040" Name="浣熊大侠" Sell="1" Function="P" Width="1" Depth="1" Height="1" Awidth="1" Adepth="1" Ahight="2" ItemEffect="2610" Gift="0" LI="9999999999" Level="255" BasePet="5000037" WI="9999999999" New="1" ></Farm>
+<Farm ShopIndex="6201" Index="5100001" Name="小鼠的奶酪店" Sell="1" Function="L" Width="3" Depth="3" Height="2" Gift="0" LI="200" Level="1" WI="170" EXP="1" Buildtime="15" Cooltime="120" Output="45" Energy="1" IWI="90" IEnergy="1" ></Farm>
+<Farm ShopIndex="6201" Index="5100002" Name="小猫的魔法店" Sell="1" Function="L" Width="4" Depth="4" Height="3" Gift="0" LI="600" Level="5" WI="510" EXP="1" Buildtime="10" Cooltime="300" Output="100" Energy="1" IWI="200" IEnergy="1" ></Farm>
+<Farm ShopIndex="6201" Index="5100003" Name="蜜熊的豪宅" Sell="1" Function="L" Width="5" Depth="5" Height="3" Gift="0" LI="1200" Level="9" WI="1020" EXP="3" Buildtime="20" Cooltime="600" Output="260" Energy="1" IWI="520" IEnergy="4" ></Farm>
+<Farm ShopIndex="6201" Index="5100009" Name="星星罐头厂" Sell="1" Function="L" Width="3" Depth="3" Height="2" Gift="0" LI="1800" Level="11" WI="1530" EXP="5" Buildtime="30" Cooltime="1800" Output="450" Energy="1" IWI="900" IEnergy="4" ></Farm>
+<Farm ShopIndex="6201" Index="5100010" Name="金库" Sell="1" Function="L" Width="4" Depth="4" Height="3" Gift="0" LI="3600" Level="15" WI="2060" EXP="9" Buildtime="30" Cooltime="3600" Output="860" Energy="1" IWI="1720" IEnergy="4" ></Farm>
+<Farm ShopIndex="6201" Index="5100011" Name="宝箱博物馆" Sell="1" Function="L" Width="5" Depth="4" Height="4" Gift="0" LI="7200" Level="16" WI="6120" EXP="12" Buildtime="40" Cooltime="7200" Output="1200" Energy="1" IWI="2400" IEnergy="5" ></Farm>
+<Farm ShopIndex="6201" Index="5100012" Name="星星土司房" Sell="1" Function="L" Width="4" Depth="4" Height="4" Gift="0" LI="10200" Level="21" WI="8500" EXP="15" Buildtime="40" Cooltime="18000" Output="1500" Energy="1" IWI="3000" IEnergy="5" ></Farm>
+<Farm ShopIndex="6201" Index="5100013" Name="法式面包店" Sell="1" Function="L" Width="4" Depth="3" Height="3" Gift="0" LI="30000" Level="25" WI="25500" EXP="34" Buildtime="50" Cooltime="25200" Output="3400" Energy="1" IWI="6800" IEnergy="5" ></Farm>
+<Farm ShopIndex="6201" Index="5100014" Name="巧克力糖果铺" Sell="1" Function="L" Width="3" Depth="3" Height="2" Gift="0" LI="32000" Level="31" WI="27200" EXP="36" Buildtime="50" Cooltime="43200" Output="3600" Energy="1" IWI="7200" IEnergy="6" ></Farm>
+<Farm ShopIndex="6201" Index="5100015" Name="华夫烘培屋" Sell="1" Function="L" Width="4" Depth="4" Height="3" Gift="0" LI="40000" Level="35" WI="34000" EXP="40" Buildtime="50" Cooltime="50400" Output="4200" Energy="1" IWI="8400" IEnergy="6" ></Farm>
+<Farm ShopIndex="6202" Index="5100005" Name="树苗屋" Sell="1" Function="W" Width="3" Depth="3" Height="2" Gift="0" LI="100" Level="1" WI="75" EXP="1" Buildtime="10" Cooltime="120" Output="30" Energy="1" IEnergy="1" ILI="90" ></Farm>
+<Farm ShopIndex="6202" Index="5100006" Name="成长树屋" Sell="1" Function="W" Width="3" Depth="3" Height="2" Gift="0" LI="300" Level="5" WI="170" EXP="1" Buildtime="10" Cooltime="300" Output="50" Energy="1" IEnergy="1" ILI="150" ></Farm>
+<Farm ShopIndex="6202" Index="5100007" Name="木桩树屋" Sell="1" Function="W" Width="4" Depth="4" Height="2" Gift="0" LI="600" Level="9" WI="250" EXP="2" Buildtime="20" Cooltime="600" Output="150" Energy="1" IEnergy="4" ILI="450" ></Farm>
+<Farm ShopIndex="6202" Index="5100008" Name="大头树屋" Sell="1" Function="W" Width="4" Depth="4" Height="4" Gift="0" LI="900" Level="11" WI="510" EXP="2" Buildtime="20" Cooltime="1800" Output="220" Energy="1" IEnergy="4" ILI="660" ></Farm>
+<Farm ShopIndex="6202" Index="5100016" Name="草莓栽培屋" Sell="1" Function="W" Width="3" Depth="3" Height="2" Gift="0" LI="1800" Level="15" WI="1020" EXP="4" Buildtime="30" Cooltime="3600" Output="430" Energy="1" IEnergy="4" ILI="1290" ></Farm>
+<Farm ShopIndex="6202" Index="5100017" Name="柠檬研究所" Sell="1" Function="W" Width="4" Depth="4" Height="2" Gift="0" LI="3600" Level="16" WI="2040" EXP="6" Buildtime="30" Cooltime="7200" Output="600" Energy="1" IEnergy="5" ILI="1800" ></Farm>
+<Farm ShopIndex="6202" Index="5100018" Name="菠萝植物园" Sell="1" Function="W" Width="5" Depth="5" Height="3" Gift="0" LI="5010" Level="21" WI="4350" EXP="8" Buildtime="40" Cooltime="18000" Output="750" Energy="1" IEnergy="5" ILI="2250" ></Farm>
+<Farm ShopIndex="6202" Index="5100019" Name="橡子杂货铺" Sell="1" Function="W" Width="3" Depth="3" Height="2" Gift="0" LI="10000" Level="25" WI="8500" EXP="14" Buildtime="50" Cooltime="25200" Output="1700" Energy="1" IEnergy="5" ILI="5100" ></Farm>
+<Farm ShopIndex="6202" Index="5100021" Name="栗子干货店" Sell="1" Function="W" Width="4" Depth="4" Height="3" Gift="0" LI="12000" Level="31" WI="10400" EXP="17" Buildtime="50" Cooltime="43200" Output="1800" Energy="1" IEnergy="6" ILI="5400" ></Farm>
+<Farm ShopIndex="6202" Index="5100020" Name="花生塔楼" Sell="1" Function="W" Width="3" Depth="3" Height="4" Gift="0" LI="14000" Level="35" WI="11900" EXP="19" Buildtime="50" Cooltime="43200" Output="1900" Energy="1" IEnergy="6" ILI="5700" ></Farm>
+<Farm ShopIndex="6202" Index="5100022" Name="风车屋" Sell="1" Function="W" Width="6" Depth="6" Height="5" Gift="0" LI="34000" Level="40" WI="28900" EXP="20" Buildtime="50" Cooltime="50400" Output="2000" Energy="1" IEnergy="6" ILI="6000" ></Farm>
+<Farm ShopIndex="6301" Index="5200001" Name="蛋型跳水台" Sell="1" Function="T" Width="3" Depth="3" Height="2" Gift="0" LI="1200" Level="1" WI="1020" Buildtime="0" Cooltime="1800" Output="1" Energy="1" IEnergy="4" ILI="1500" Type="Vit" ></Farm>
+<Farm ShopIndex="6302" Index="5200002" Name="宝贝田径场" Sell="1" Function="T" Width="3" Depth="3" Height="2" Gift="0" LI="1200" Level="1" WI="1020" Buildtime="0" Cooltime="1800" Output="1" Energy="1" IEnergy="4" ILI="1500" Type="Dex" ></Farm>
+<Farm ShopIndex="6303" Index="5200005" Name="铅笔教室" Sell="1" Function="T" Width="3" Depth="3" Height="3" Gift="0" LI="1200" Level="1" WI="1020" Buildtime="0" Cooltime="1800" Output="1" Energy="1" IEnergy="4" ILI="1500" Type="Int" ></Farm>
+<Farm ShopIndex="6301" Index="5200004" Name="鸭子游泳馆" Sell="1" Function="T" Width="4" Depth="4" Height="2" Gift="0" LI="24000" Level="10" WI="20400" Buildtime="0" Cooltime="7200" Output="4" Energy="1" IEnergy="6" ILI="6000" Type="Vit" ></Farm>
+<Farm ShopIndex="6302" Index="5200003" Name="圆顶体育馆" Sell="1" Function="T" Width="3" Depth="3" Height="3" Gift="0" LI="24000" Level="10" WI="20400" Buildtime="0" Cooltime="7200" Output="4" Energy="1" IEnergy="6" ILI="6000" Type="Dex" ></Farm>
+<Farm ShopIndex="6303" Index="5200006" Name="钢笔教室" Sell="1" Function="T" Width="3" Depth="3" Height="3" Gift="0" LI="24000" Level="10" WI="20400" Buildtime="0" Cooltime="7200" Output="4" Energy="1" IEnergy="6" ILI="6000" Type="Int" ></Farm>
+<Farm ShopIndex="6302" Index="5200007" Name="回旋镖训练场" Sell="1" Function="T" Width="5" Depth="5" Height="3" Gift="0" LI="32000" Level="20" WI="27200" Buildtime="0" Cooltime="16200" Output="9" Energy="1" IEnergy="8" ILI="13000" Type="Dex" ></Farm>
+<Farm ShopIndex="6303" Index="5200008" Name="书本自习室" Sell="1" Function="T" Width="4" Depth="4" Height="3" Gift="0" LI="32000" Level="20" WI="27200" Buildtime="0" Cooltime="16200" Output="9" Energy="1" IEnergy="8" ILI="13000" Type="Int" ></Farm>
+<Farm ShopIndex="6301" Index="5200009" Name="天鹅游泳场" Sell="1" Function="T" Width="5" Depth="5" Height="3" Gift="0" LI="32000" Level="20" WI="27200" Buildtime="0" Cooltime="16200" Output="9" Energy="1" IEnergy="8" ILI="13000" Type="Vit" ></Farm>
+<Farm ShopIndex="6401" Index="5300019" Name="石地板1号" Sell="1" Function="J" Width="1" Depth="1" Height="0" Gift="0" LI="300" Level="5" WI="250" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300020" Name="石地板2号" Sell="1" Function="J" Width="2" Depth="1" Height="0" Gift="0" LI="660" Level="5" WI="560" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300021" Name="石地板3号" Sell="1" Function="J" Width="2" Depth="2" Height="0" Gift="0" LI="1380" Level="5" WI="1170" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300022" Name="石地板4号" Sell="1" Function="J" Width="4" Depth="1" Height="0" Gift="0" LI="1380" Level="5" WI="1170" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300027" Name="石地板5号" Sell="1" Function="J" Width="4" Depth="2" Height="0" Gift="0" LI="2520" Level="5" WI="2200" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300001" Name="向日葵" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="600" Level="5" WI="510" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300002" Name="红色绣球花" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="300" Level="6" WI="250" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300023" Name="木栅栏" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="200" Level="6" WI="170" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300024" Name="直角木栅栏" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="300" Level="6" WI="250" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300003" Name="黄色绣球花" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="300" Level="7" WI="250" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6505" Index="5300017" Name="红色胡桃夹子" Sell="1" Function="D" Width="2" Depth="1" Height="3" Gift="0" LI="1000" Level="7" WI="850" Buildtime="0" Output="5" ></Farm>
+<Farm ShopIndex="6505" Index="5300018" Name="蓝色胡桃夹子" Sell="1" Function="D" Width="2" Depth="1" Height="3" Gift="0" LI="1000" Level="8" WI="850" Buildtime="0" Output="5" ></Farm>
+<Farm ShopIndex="6401" Index="5300004" Name="紫色绣球花" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="300" Level="8" WI="250" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300005" Name="亮色原木长凳" Sell="1" Function="J" Width="2" Depth="1" Height="1" Gift="0" LI="1500" Level="9" WI="1200" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300006" Name="高级原木长凳" Sell="1" Function="J" Width="2" Depth="1" Height="1" Gift="0" LI="1500" Level="11" WI="1200" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300007" Name="祈祷小天使" Sell="1" Function="J" Width="2" Depth="2" Height="3" Gift="0" LI="2000" Level="12" WI="1700" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300008" Name="淘气小天使" Sell="1" Function="J" Width="2" Depth="2" Height="3" Gift="0" LI="2000" Level="13" WI="1700" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300025" Name="白栅栏" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="200" Level="13" WI="170" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300026" Name="直角白栅栏" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="300" Level="14" WI="250" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300014" Name="跷跷板" Sell="1" Function="J" Width="2" Depth="2" Height="1" Gift="0" LI="2000" Level="14" WI="1700" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300011" Name="闪闪皇冠灯" Sell="1" Function="J" Width="1" Depth="1" Height="2" Gift="0" LI="1000" Level="14" WI="700" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300012" Name="暗黑皇冠灯" Sell="1" Function="J" Width="1" Depth="1" Height="2" Gift="0" LI="1000" Level="15" WI="700" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300013" Name="大象滑梯" Sell="1" Function="J" Width="2" Depth="1" Height="2" Gift="0" LI="3000" Level="16" WI="2050" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300015" Name="兔子秋千" Sell="1" Function="J" Width="1" Depth="1" Height="2" Gift="0" LI="4000" Level="17" WI="3400" Buildtime="0" Energy="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300016" Name="星星钉子" Sell="0" Function="A" Width="1" Depth="1" Height="2" Gift="0" LI="9999999999" Level="1" WI="9999999999" Show="0" Buildtime="0" ></Farm>
+<Farm ShopIndex="6504" Index="5400001" Name="30x30扩张券" Sell="1" Function="E" ItemEffect="2171" Gift="0" LI="1000" Level="1" WI="850" ></Farm>
+<Farm ShopIndex="6504" Index="5400002" Name="32x32扩张券" Sell="1" Function="E" ItemEffect="2172" Gift="0" LI="15000" Level="12" WI="13750" ></Farm>
+<Farm ShopIndex="6504" Index="5400003" Name="34x34扩张券" Sell="1" Function="E" ItemEffect="2173" Gift="0" LI="30000" Level="22" WI="20500" ></Farm>
+<Farm ShopIndex="6504" Index="5400004" Name="36x36扩张券" Sell="1" Function="E" ItemEffect="2174" Gift="0" LI="60000" Level="35" WI="51000" ></Farm>
+<Farm ShopIndex="6502" Index="724" Name="星星 5000" Sell="0" Function="R" ItemEffect="2271" Cash="1" ShopItem="1" Amount="5000" PN="150" ></Farm>
+<Farm ShopIndex="6502" Index="725" Name="星星 10000" Sell="0" Function="R" ItemEffect="2272" Cash="1" ShopItem="1" Amount="10000" PN="250" ></Farm>
+<Farm ShopIndex="6502" Index="726" Name="星星 50000" Sell="0" Function="R" ItemEffect="2273" Cash="1" ShopItem="1" Amount="50000" PN="1000" ></Farm>
+<Farm ShopIndex="6503" Index="727" Name="木材 5000" Sell="0" Function="R" ItemEffect="2274" Cash="1" ShopItem="1" Amount="5000" PN="180" ></Farm>
+<Farm ShopIndex="6503" Index="728" Name="木材 10000" Sell="0" Function="R" ItemEffect="2275" Cash="1" ShopItem="1" Amount="10000" PN="300" ></Farm>
+<Farm ShopIndex="6503" Index="729" Name="木材 50000" Sell="0" Function="R" ItemEffect="2276" Cash="1" ShopItem="1" Amount="50000" PN="1200" ></Farm>
+<Farm ShopIndex="6502" Index="741" Name="星星 3000" Sell="0" Function="R" ItemEffect="2329" Gift="0" Show="0" ShopItem="1" Amount="3000" PN="9999999999" getgift="1" ></Farm>
+<Farm ShopIndex="6502" Index="743" Name="星星 1000" Sell="0" Function="R" ItemEffect="2330" Gift="0" Show="0" ShopItem="1" Amount="1000" PN="9999999999" getgift="1" ></Farm>
+<Farm ShopIndex="6503" Index="740" Name="木材 3000" Sell="0" Function="R" ItemEffect="2331" Gift="0" Show="0" ShopItem="1" Amount="3000" PN="9999999999" getgift="1" ></Farm>
+<Farm ShopIndex="6503" Index="742" Name="木材 1000" Sell="0" Function="R" ItemEffect="2332" Gift="0" Show="0" ShopItem="1" Amount="1000" PN="9999999999" getgift="1" ></Farm>
+<Farm ShopIndex="6502" Index="744" Name="星星 5000" Sell="0" Function="R" ItemEffect="2357" Gift="0" Show="0" ShopItem="1" Amount="5000" PN="9999999999" getgift="1" ></Farm>
+<Farm ShopIndex="6501" Index="745" Name="能量 20" Sell="0" Function="R" ItemEffect="2358" Gift="0" Show="0" ShopItem="1" Amount="20" PN="9999999999" getgift="1" ></Farm>
+<Farm ShopIndex="6401" Index="5300028" Name="红果树" Sell="1" Function="J" Width="1" Depth="1" Height="2" Gift="0" LI="2200" Level="18" WI="1540" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300029" Name="黄果树" Sell="1" Function="J" Width="1" Depth="1" Height="2" Gift="0" LI="2300" Level="18" WI="1610" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300030" Name="木桩餐桌" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="2100" Level="19" WI="1470" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300031" Name="白色木马" Sell="1" Function="J" Width="1" Depth="2" Height="2" Gift="0" LI="5000" Level="22" WI="3500" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300032" Name="褐色木马" Sell="1" Function="J" Width="1" Depth="2" Height="2" Gift="0" LI="5000" Level="22" WI="3500" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300033" Name="木柴" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="1800" Level="23" WI="1260" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300034" Name="红色蘑菇" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="4500" Level="24" WI="3150" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300035" Name="黄色蘑菇" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="4500" Level="24" WI="3150" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300036" Name="荷花池" Sell="1" Function="J" Width="2" Depth="2" Height="1" Gift="0" LI="6000" Level="26" WI="4200" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300037" Name="红色郁金香" Sell="1" Function="J" Width="1" Depth="1" Height="2" Gift="0" LI="2300" Level="27" WI="1610" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300038" Name="紫色郁金香" Sell="1" Function="J" Width="1" Depth="1" Height="2" Gift="0" LI="2300" Level="27" WI="1610" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300039" Name="指示牌" Sell="1" Function="J" Width="1" Depth="1" Height="2" Gift="0" LI="3000" Level="28" WI="2100" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300040" Name="野餐篮子" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="3000" Level="29" WI="2100" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6104" Index="1000780" Name="速度值 +1" Sell="0" Function="I" ItemEffect="2397" Gift="0" Level="1" L1="1500" W1="750" L3="3500" W3="1750" L7="7000" W7="3500" DexUp="1" ></Farm>
+<Farm ShopIndex="6104" Index="1000781" Name="速度值 +3" Sell="0" Function="I" ItemEffect="2398" Gift="0" Level="1" L1="3000" W1="1500" L3="7500" W3="3750" L7="15000" W7="7500" DexUp="3" ></Farm>
+<Farm ShopIndex="6104" Index="1000783" Name="体力值 +1" Sell="0" Function="I" ItemEffect="2400" Gift="0" Level="1" L1="1500" W1="750" L3="3500" W3="1750" L7="7000" W7="3500" VitUp="1" ></Farm>
+<Farm ShopIndex="6104" Index="1000784" Name="体力值 +3" Sell="0" Function="I" ItemEffect="2401" Gift="0" Level="1" L1="3000" W1="1500" L3="7500" W3="3750" L7="15000" W7="7500" VitUp="3" ></Farm>
+<Farm ShopIndex="6104" Index="1000786" Name="智能值 +1" Sell="0" Function="I" ItemEffect="2403" Gift="0" Level="1" L1="1500" W1="750" L3="3500" W3="1750" L7="7000" W7="3500" IntUp="1" ></Farm>
+<Farm ShopIndex="6104" Index="1000787" Name="智能值 +3" Sell="0" Function="I" ItemEffect="2404" Gift="0" Level="1" L1="3000" W1="1500" L3="7500" W3="3750" L7="15000" W7="7500" IntUp="3" ></Farm>
+<Farm ShopIndex="6401" Index="5300047" Name="褐色木箱" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="3000" Level="30" WI="2100" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300051" Name="手推车" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="3000" Level="30" WI="2100" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300043" Name="红花花盆" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="2300" Level="32" WI="1610" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300044" Name="蓝花花盆" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="2300" Level="32" WI="1610" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300049" Name="红色小狗屋" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="4500" Level="33" WI="3150" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300050" Name="蓝色小狗屋" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="4500" Level="33" WI="3150" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300058" Name="摇椅" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="5800" Level="33" WI="4800" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300048" Name="风向标" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="4500" Level="34" WI="3150" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300052" Name="铲车" Sell="1" Function="J" Width="2" Depth="2" Height="2" Gift="0" LI="4500" Level="34" WI="3150" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300053" Name="水桶" Sell="1" Function="J" Width="2" Depth="2" Height="1" Gift="0" LI="4500" Level="34" WI="3150" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300042" Name="向导牌" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="3200" Level="36" WI="2720" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300041" Name="帮助指示牌" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="3200" Level="36" WI="2720" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300054" Name="南瓜稻草人" Sell="1" Function="J" Width="2" Depth="2" Height="2" Gift="0" LI="4500" Level="36" WI="3150" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300045" Name="熊妈妈玩偶" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="4500" Level="37" WI="3150" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300046" Name="熊宝宝玩偶" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="4500" Level="37" WI="3150" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300057" Name="地球仪" Sell="1" Function="J" Width="1" Depth="1" Height="2" Gift="0" LI="5000" Level="37" WI="4000" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300059" Name="木马玩具" Sell="1" Function="J" Width="1" Depth="1" Height="1" Gift="0" LI="5800" Level="38" WI="4800" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6201" Index="5100024" Name="梦幻别墅" Sell="1" Function="L" Width="3" Depth="3" Height="3" Gift="0" LI="52000" Level="38" WI="44200" EXP="45" Buildtime="60" Cooltime="61200" Output="5600" Energy="0" IWI="10200" IEnergy="5" ></Farm>
+<Farm ShopIndex="6401" Index="5300055" Name="青铜钟" Sell="1" Function="J" Width="2" Depth="1" Height="2" Gift="0" LI="5500" Level="39" WI="4500" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300056" Name="银钟" Sell="1" Function="J" Width="2" Depth="1" Height="2" Gift="0" LI="5500" Level="39" WI="4500" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6201" Index="5100025" Name="野餐别墅" Sell="1" Function="L" Width="3" Depth="3" Height="3" Gift="0" LI="98000" Level="40" WI="83300" EXP="60" Buildtime="75" Cooltime="86400" Output="8600" Energy="0" IWI="17200" IEnergy="8" ></Farm>
+<Farm ShopIndex="6401" Index="5300060" Name="拿铁咖啡" Sell="1" Function="J" Width="2" Depth="2" Height="1" Gift="0" LI="6500" Level="41" WI="5500" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300061" Name="草莓蛋糕" Sell="1" Function="J" Width="2" Depth="2" Height="1" Gift="0" LI="6500" Level="42" WI="5500" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6401" Index="5300062" Name="提拉米苏" Sell="1" Function="J" Width="2" Depth="2" Height="1" Gift="0" LI="6500" Level="42" WI="5500" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6202" Index="5100026" Name="豌豆展馆" Sell="1" Function="W" Width="3" Depth="3" Height="3" Gift="0" LI="40000" Level="43" WI="34000" EXP="24" Buildtime="60" Cooltime="61200" Output="2800" Energy="0" IEnergy="5" ILI="8400" ></Farm>
+<Farm ShopIndex="6202" Index="5100028" Name="南瓜屋" Sell="1" Function="W" Width="3" Depth="3" Height="3" Gift="0" LI="87000" Level="47" WI="83500" EXP="30" Buildtime="75" Cooltime="86400" Output="4200" Energy="0" IEnergy="8" ILI="12600" ></Farm>
+<Farm ShopIndex="6504" Index="5400008" Name="38x38扩张券" Sell="0" Function="E" ItemEffect="2688" Gift="0" LI="800000" Level="42" WI="780000" New="1" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6504" Index="5400009" Name="40x40扩张券" Sell="0" Function="E" ItemEffect="2689" Gift="0" LI="1500000" Level="50" WI="1420000" New="1" Buildtime="0" Cooltime="0" Energy="0" ></Farm>
+<Farm ShopIndex="6601" Index="5600001" Name="人物角色" Sell="0" Function="C" Width="1" Depth="1" Height="2" Gift="0" LI="9999999999" Level="1" WI="9999999999" Buildtime="0" ></Farm>
+<Farm ShopIndex="6201" Index="5100023" Name="星星豪华房" Sell="1" Function="L" Width="3" Depth="3" Height="3" Level="21" EXP="15" Buildtime="40" Cooltime="18000" Output="3000" Energy="0" IWI="6000" IEnergy="3" Cash="1" PI="400" ></Farm>
+<Farm ShopIndex="6202" Index="5100027" Name="玉米谷仓" Sell="1" Function="W" Width="3" Depth="3" Height="3" Level="21" EXP="10" Buildtime="40" Cooltime="18000" Output="1500" Energy="0" IEnergy="3" Cash="1" PI="200" ILI="4500" ExtraValue="W" ></Farm>
+<Farm ShopIndex="6104" Index="1000782" Name="速度值 +5" Sell="0" Function="I" ItemEffect="2399" Level="1" Show="0" Cash="1" DexUp="5" P7="700" ></Farm>
+<Farm ShopIndex="6104" Index="1000785" Name="体力值 +5" Sell="0" Function="I" ItemEffect="2402" Level="1" Show="0" Cash="1" P7="700" VitUp="5" ></Farm>
+<Farm ShopIndex="6104" Index="1000788" Name="智能值 +5" Sell="0" Function="I" ItemEffect="2405" Level="1" Show="0" Cash="1" P7="700" IntUp="5" ></Farm>
+<Farm ShopIndex="6501" Index="730" Name="能量 10" Sell="0" Function="R" ItemEffect="2277" Cash="1" ShopItem="1" Amount="10" PN="150" ></Farm>
+<Farm ShopIndex="6501" Index="731" Name="能量 20" Sell="0" Function="R" ItemEffect="2278" Cash="1" ShopItem="1" Amount="20" PN="300" ></Farm>
+<Farm ShopIndex="6501" Index="732" Name="能量 30" Sell="0" Function="R" ItemEffect="2279" Cash="1" ShopItem="1" Amount="30" PN="450" ></Farm>
+<Farm ShopIndex="6506" Index="5400007" Name="庄园宠物改名卡" Sell="0" Function="E" ItemEffect="2615" Level="1" New="1" Buildtime="0" Cooltime="0" Energy="0" Cash="1" PN="50" ></Farm>
+</Body>
+

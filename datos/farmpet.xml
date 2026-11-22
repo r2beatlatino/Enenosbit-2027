@@ -1,0 +1,630 @@
+<!--°øÅë»çÇ× -->
+<Common BaseVIT="10" BaseDEX="6" BaseINT="4">
+	<Level Value="1" BodyType="0" NeedEXP="0" VIT="0" DEX="0" INT="0"></Level>
+	<Level Value="2" BodyType="0" NeedEXP="20" VIT="1" DEX="1" INT="1"></Level>
+	<Level Value="3" BodyType="0" NeedEXP="42" VIT="2" DEX="2" INT="2"></Level>
+	<Level Value="4" BodyType="0" NeedEXP="66" VIT="3" DEX="3" INT="3"></Level>
+	<Level Value="5" BodyType="0" NeedEXP="92" VIT="4" DEX="4" INT="4"></Level>
+	<Level Value="6" BodyType="0" NeedEXP="122" VIT="5" DEX="5" INT="5"></Level>
+	<Level Value="7" BodyType="0" NeedEXP="154" VIT="6" DEX="6" INT="6"></Level>
+	<Level Value="8" BodyType="0" NeedEXP="190" VIT="7" DEX="7" INT="7"></Level>
+	<Level Value="9" BodyType="0" NeedEXP="228" VIT="8" DEX="8" INT="8"></Level>
+	<Level Value="10" BodyType="0" NeedEXP="272" VIT="9" DEX="9" INT="9"></Level>
+	<Level Value="11" BodyType="0" NeedEXP="318" VIT="10" DEX="10" INT="10"></Level>
+	<Level Value="12" BodyType="0" NeedEXP="370" VIT="11" DEX="11" INT="11"></Level>
+	<Level Value="13" BodyType="0" NeedEXP="428" VIT="12" DEX="12" INT="12"></Level>
+	<Level Value="14" BodyType="0" NeedEXP="490" VIT="13" DEX="13" INT="13"></Level>
+	<Level Value="15" BodyType="0" NeedEXP="560" VIT="14" DEX="14" INT="14"></Level>
+	<Level Value="16" BodyType="0" NeedEXP="636" VIT="15" DEX="15" INT="15"></Level>
+	<Level Value="17" BodyType="0" NeedEXP="718" VIT="16" DEX="16" INT="16"></Level>
+	<Level Value="18" BodyType="0" NeedEXP="810" VIT="17" DEX="17" INT="17"></Level>
+	<Level Value="19" BodyType="0" NeedEXP="912" VIT="18" DEX="18" INT="18"></Level>
+	<Level Value="20" BodyType="0" NeedEXP="1024" VIT="19" DEX="19" INT="19"></Level>
+	<Level Value="21" BodyType="0" NeedEXP="1146" VIT="20" DEX="20" INT="20"></Level>
+	<Level Value="22" BodyType="0" NeedEXP="1280" VIT="21" DEX="21" INT="21"></Level>
+	<Level Value="23" BodyType="0" NeedEXP="1428" VIT="22" DEX="22" INT="22"></Level>
+	<Level Value="24" BodyType="0" NeedEXP="1590" VIT="23" DEX="23" INT="23"></Level>
+	<Level Value="25" BodyType="0" NeedEXP="1770" VIT="24" DEX="24" INT="24"></Level>
+	<Level Value="26" BodyType="0" NeedEXP="1966" VIT="25" DEX="25" INT="25"></Level>
+	<Level Value="27" BodyType="0" NeedEXP="2184" VIT="26" DEX="26" INT="26"></Level>
+	<Level Value="28" BodyType="0" NeedEXP="2422" VIT="27" DEX="27" INT="27"></Level>
+	<Level Value="29" BodyType="0" NeedEXP="2684" VIT="28" DEX="28" INT="28"></Level>
+	<Level Value="30" BodyType="0" NeedEXP="2972" VIT="29" DEX="29" INT="29"></Level>
+
+<DexLevel NeedPiece="0" Add="0"></DexLevel> 
+<DexLevel NeedPiece="2" Add="1"></DexLevel> 
+<DexLevel NeedPiece="4" Add="2"></DexLevel> 
+<DexLevel NeedPiece="8" Add="3"></DexLevel> 
+<DexLevel NeedPiece="12" Add="4"></DexLevel> 
+<DexLevel NeedPiece="16" Add="5"></DexLevel> 
+<DexLevel NeedPiece="22" Add="6"></DexLevel> 
+<DexLevel NeedPiece="28" Add="7"></DexLevel> 
+<DexLevel NeedPiece="34" Add="8"></DexLevel> 
+<DexLevel NeedPiece="42" Add="9"></DexLevel> 
+<DexLevel NeedPiece="50" Add="10"></DexLevel> 
+<DexLevel NeedPiece="58" Add="11"></DexLevel> 
+<DexLevel NeedPiece="68" Add="12"></DexLevel> 
+<DexLevel NeedPiece="78" Add="13"></DexLevel> 
+<DexLevel NeedPiece="88" Add="14"></DexLevel> 
+<DexLevel NeedPiece="100" Add="15"></DexLevel> 
+<DexLevel NeedPiece="112" Add="16"></DexLevel> 
+<DexLevel NeedPiece="106" Add="17"></DexLevel> 
+<DexLevel NeedPiece="118" Add="18"></DexLevel> 
+<DexLevel NeedPiece="152" Add="19"></DexLevel> 
+<DexLevel NeedPiece="166" Add="20"></DexLevel> 
+<DexLevel NeedPiece="182" Add="21"></DexLevel> 
+<DexLevel NeedPiece="198" Add="22"></DexLevel> 
+<DexLevel NeedPiece="214" Add="23"></DexLevel> 
+<DexLevel NeedPiece="232" Add="24"></DexLevel> 
+<DexLevel NeedPiece="250" Add="25"></DexLevel> 
+<DexLevel NeedPiece="268" Add="26"></DexLevel> 
+<DexLevel NeedPiece="286" Add="27"></DexLevel> 
+<DexLevel NeedPiece="304" Add="28"></DexLevel> 
+<DexLevel NeedPiece="322" Add="29"></DexLevel> 
+<DexLevel NeedPiece="340" Add="30"></DexLevel> 
+<DexLevel NeedPiece="358" Add="31"></DexLevel> 
+<DexLevel NeedPiece="376" Add="32"></DexLevel> 
+<DexLevel NeedPiece="394" Add="33"></DexLevel> 
+<DexLevel NeedPiece="412" Add="34"></DexLevel> 
+<DexLevel NeedPiece="430" Add="35"></DexLevel> 
+<DexLevel NeedPiece="448" Add="36"></DexLevel> 
+<DexLevel NeedPiece="466" Add="37"></DexLevel> 
+<DexLevel NeedPiece="484" Add="38"></DexLevel> 
+<DexLevel NeedPiece="538" Add="41"></DexLevel> 
+<DexLevel NeedPiece="556" Add="42"></DexLevel> 
+<DexLevel NeedPiece="574" Add="43"></DexLevel> 
+<DexLevel NeedPiece="592" Add="44"></DexLevel> 
+<DexLevel NeedPiece="610" Add="45"></DexLevel> 
+<DexLevel NeedPiece="628" Add="46"></DexLevel> 
+<DexLevel NeedPiece="646" Add="47"></DexLevel> 
+<DexLevel NeedPiece="664" Add="48"></DexLevel> 
+<DexLevel NeedPiece="682" Add="49"></DexLevel> 
+<DexLevel NeedPiece="700" Add="50"></DexLevel> 
+<DexLevel NeedPiece="718" Add="51"></DexLevel> 
+<DexLevel NeedPiece="736" Add="52"></DexLevel> 
+<DexLevel NeedPiece="754" Add="53"></DexLevel> 
+<DexLevel NeedPiece="772" Add="54"></DexLevel> 
+<DexLevel NeedPiece="790" Add="55"></DexLevel> 
+<DexLevel NeedPiece="808" Add="56"></DexLevel> 
+<DexLevel NeedPiece="826" Add="57"></DexLevel> 
+<DexLevel NeedPiece="844" Add="58"></DexLevel> 
+<DexLevel NeedPiece="862" Add="59"></DexLevel> 
+<DexLevel NeedPiece="880" Add="60"></DexLevel> 
+<DexLevel NeedPiece="898" Add="61"></DexLevel> 
+<DexLevel NeedPiece="916" Add="62"></DexLevel> 
+<DexLevel NeedPiece="934" Add="63"></DexLevel> 
+<DexLevel NeedPiece="952" Add="64"></DexLevel> 
+<DexLevel NeedPiece="970" Add="65"></DexLevel> 
+<DexLevel NeedPiece="988" Add="66"></DexLevel> 
+<DexLevel NeedPiece="1006" Add="67"></DexLevel> 
+<DexLevel NeedPiece="1024" Add="68"></DexLevel> 
+<DexLevel NeedPiece="1042" Add="69"></DexLevel> 
+<DexLevel NeedPiece="1060" Add="70"></DexLevel> 
+<DexLevel NeedPiece="1078" Add="71"></DexLevel> 
+<DexLevel NeedPiece="1096" Add="72"></DexLevel> 
+<DexLevel NeedPiece="1114" Add="73"></DexLevel> 
+<DexLevel NeedPiece="1132" Add="74"></DexLevel> 
+<DexLevel NeedPiece="1150" Add="75"></DexLevel> 
+<DexLevel NeedPiece="1168" Add="76"></DexLevel> 
+<DexLevel NeedPiece="1186" Add="77"></DexLevel> 
+<DexLevel NeedPiece="1204" Add="78"></DexLevel> 
+<DexLevel NeedPiece="1222" Add="79"></DexLevel> 
+<DexLevel NeedPiece="1240" Add="80"></DexLevel> 
+<DexLevel NeedPiece="1258" Add="81"></DexLevel> 
+<DexLevel NeedPiece="1276" Add="82"></DexLevel> 
+<DexLevel NeedPiece="1294" Add="83"></DexLevel> 
+<DexLevel NeedPiece="1312" Add="84"></DexLevel> 
+<DexLevel NeedPiece="1330" Add="85"></DexLevel> 
+<DexLevel NeedPiece="1348" Add="86"></DexLevel> 
+<DexLevel NeedPiece="1366" Add="87"></DexLevel> 
+<DexLevel NeedPiece="1384" Add="88"></DexLevel> 
+<DexLevel NeedPiece="1402" Add="89"></DexLevel> 
+<DexLevel NeedPiece="1420" Add="90"></DexLevel> 
+<DexLevel NeedPiece="1438" Add="91"></DexLevel> 
+<DexLevel NeedPiece="1456" Add="92"></DexLevel> 
+<DexLevel NeedPiece="1474" Add="93"></DexLevel> 
+<DexLevel NeedPiece="1492" Add="94"></DexLevel> 
+<DexLevel NeedPiece="1510" Add="95"></DexLevel> 
+<DexLevel NeedPiece="1528" Add="96"></DexLevel> 
+<DexLevel NeedPiece="1546" Add="97"></DexLevel> 
+<DexLevel NeedPiece="1564" Add="98"></DexLevel> 
+<DexLevel NeedPiece="1582" Add="99"></DexLevel> 
+<VitLevel NeedPiece="0" Add="0"></VitLevel> 
+<VitLevel NeedPiece="2" Add="1">  </VitLevel> 
+<VitLevel NeedPiece="4" Add="2">  </VitLevel> 
+<VitLevel NeedPiece="8" Add="3">  </VitLevel> 
+<VitLevel NeedPiece="12" Add="4">  </VitLevel> 
+<VitLevel NeedPiece="16" Add="5">  </VitLevel> 
+<VitLevel NeedPiece="22" Add="6">  </VitLevel> 
+<VitLevel NeedPiece="28" Add="7">  </VitLevel> 
+<VitLevel NeedPiece="34" Add="8">  </VitLevel> 
+<VitLevel NeedPiece="42" Add="9">  </VitLevel> 
+<VitLevel NeedPiece="50" Add="10">  </VitLevel> 
+<VitLevel NeedPiece="58" Add="11">  </VitLevel> 
+<VitLevel NeedPiece="68" Add="12">  </VitLevel> 
+<VitLevel NeedPiece="78" Add="13">  </VitLevel> 
+<VitLevel NeedPiece="88" Add="14">  </VitLevel> 
+<VitLevel NeedPiece="100" Add="15">  </VitLevel> 
+<VitLevel NeedPiece="112" Add="16">  </VitLevel> 
+<VitLevel NeedPiece="106" Add="17">  </VitLevel> 
+<VitLevel NeedPiece="118" Add="18">  </VitLevel> 
+<VitLevel NeedPiece="152" Add="19">  </VitLevel> 
+<VitLevel NeedPiece="166" Add="20">  </VitLevel> 
+<VitLevel NeedPiece="182" Add="21">  </VitLevel> 
+<VitLevel NeedPiece="198" Add="22">  </VitLevel> 
+<VitLevel NeedPiece="214" Add="23">  </VitLevel> 
+<VitLevel NeedPiece="232" Add="24">  </VitLevel> 
+<VitLevel NeedPiece="250" Add="25">  </VitLevel> 
+<VitLevel NeedPiece="268" Add="26">  </VitLevel> 
+<VitLevel NeedPiece="286" Add="27">  </VitLevel> 
+<VitLevel NeedPiece="304" Add="28">  </VitLevel> 
+<VitLevel NeedPiece="322" Add="29">  </VitLevel> 
+<VitLevel NeedPiece="340" Add="30">  </VitLevel> 
+<VitLevel NeedPiece="358" Add="31">  </VitLevel> 
+<VitLevel NeedPiece="376" Add="32">  </VitLevel> 
+<VitLevel NeedPiece="394" Add="33">  </VitLevel> 
+<VitLevel NeedPiece="412" Add="34">  </VitLevel> 
+<VitLevel NeedPiece="430" Add="35">  </VitLevel> 
+<VitLevel NeedPiece="448" Add="36">  </VitLevel> 
+<VitLevel NeedPiece="466" Add="37">  </VitLevel> 
+<VitLevel NeedPiece="484" Add="38">  </VitLevel> 
+<VitLevel NeedPiece="538" Add="41">  </VitLevel> 
+<VitLevel NeedPiece="556" Add="42">  </VitLevel> 
+<VitLevel NeedPiece="574" Add="43">  </VitLevel> 
+<VitLevel NeedPiece="592" Add="44">  </VitLevel> 
+<VitLevel NeedPiece="610" Add="45">  </VitLevel> 
+<VitLevel NeedPiece="628" Add="46">  </VitLevel> 
+<VitLevel NeedPiece="646" Add="47">  </VitLevel> 
+<VitLevel NeedPiece="664" Add="48">  </VitLevel> 
+<VitLevel NeedPiece="682" Add="49">  </VitLevel> 
+<VitLevel NeedPiece="700" Add="50">  </VitLevel> 
+<VitLevel NeedPiece="718" Add="51">  </VitLevel> 
+<VitLevel NeedPiece="736" Add="52">  </VitLevel> 
+<VitLevel NeedPiece="754" Add="53">  </VitLevel> 
+<VitLevel NeedPiece="772" Add="54">  </VitLevel> 
+<VitLevel NeedPiece="790" Add="55">  </VitLevel> 
+<VitLevel NeedPiece="808" Add="56">  </VitLevel> 
+<VitLevel NeedPiece="826" Add="57">  </VitLevel> 
+<VitLevel NeedPiece="844" Add="58">  </VitLevel> 
+<VitLevel NeedPiece="862" Add="59">  </VitLevel> 
+<VitLevel NeedPiece="880" Add="60">  </VitLevel> 
+<VitLevel NeedPiece="898" Add="61">  </VitLevel> 
+<VitLevel NeedPiece="916" Add="62">  </VitLevel> 
+<VitLevel NeedPiece="934" Add="63">  </VitLevel> 
+<VitLevel NeedPiece="952" Add="64">  </VitLevel> 
+<VitLevel NeedPiece="970" Add="65">  </VitLevel> 
+<VitLevel NeedPiece="988" Add="66">  </VitLevel> 
+<VitLevel NeedPiece="1006" Add="67">  </VitLevel> 
+<VitLevel NeedPiece="1024" Add="68">  </VitLevel> 
+<VitLevel NeedPiece="1042" Add="69">  </VitLevel> 
+<VitLevel NeedPiece="1060" Add="70">  </VitLevel> 
+<VitLevel NeedPiece="1078" Add="71">  </VitLevel> 
+<VitLevel NeedPiece="1096" Add="72">  </VitLevel> 
+<VitLevel NeedPiece="1114" Add="73">  </VitLevel> 
+<VitLevel NeedPiece="1132" Add="74">  </VitLevel> 
+<VitLevel NeedPiece="1150" Add="75">  </VitLevel> 
+<VitLevel NeedPiece="1168" Add="76">  </VitLevel> 
+<VitLevel NeedPiece="1186" Add="77">  </VitLevel> 
+<VitLevel NeedPiece="1204" Add="78">  </VitLevel> 
+<VitLevel NeedPiece="1222" Add="79">  </VitLevel> 
+<VitLevel NeedPiece="1240" Add="80">  </VitLevel> 
+<VitLevel NeedPiece="1258" Add="81">  </VitLevel> 
+<VitLevel NeedPiece="1276" Add="82">  </VitLevel> 
+<VitLevel NeedPiece="1294" Add="83">  </VitLevel> 
+<VitLevel NeedPiece="1312" Add="84">  </VitLevel> 
+<VitLevel NeedPiece="1330" Add="85">  </VitLevel> 
+<VitLevel NeedPiece="1348" Add="86">  </VitLevel> 
+<VitLevel NeedPiece="1366" Add="87">  </VitLevel> 
+<VitLevel NeedPiece="1384" Add="88">  </VitLevel> 
+<VitLevel NeedPiece="1402" Add="89">  </VitLevel> 
+<VitLevel NeedPiece="1420" Add="90">  </VitLevel> 
+<VitLevel NeedPiece="1438" Add="91">  </VitLevel> 
+<VitLevel NeedPiece="1456" Add="92">  </VitLevel> 
+<VitLevel NeedPiece="1474" Add="93">  </VitLevel> 
+<VitLevel NeedPiece="1492" Add="94">  </VitLevel> 
+<VitLevel NeedPiece="1510" Add="95">  </VitLevel> 
+<VitLevel NeedPiece="1528" Add="96">  </VitLevel> 
+<VitLevel NeedPiece="1546" Add="97">  </VitLevel> 
+<VitLevel NeedPiece="1564" Add="98">  </VitLevel> 
+<VitLevel NeedPiece="1582" Add="99">  </VitLevel>
+<IntLevel NeedPiece="0" Add="0"></IntLevel> 
+<IntLevel NeedPiece="2" Add="1"></IntLevel> 
+<IntLevel NeedPiece="4" Add="2"></IntLevel> 
+<IntLevel NeedPiece="8" Add="3"></IntLevel> 
+<IntLevel NeedPiece="12" Add="4"></IntLevel> 
+<IntLevel NeedPiece="16" Add="5"></IntLevel> 
+<IntLevel NeedPiece="22" Add="6"></IntLevel> 
+<IntLevel NeedPiece="28" Add="7"></IntLevel> 
+<IntLevel NeedPiece="34" Add="8"></IntLevel> 
+<IntLevel NeedPiece="42" Add="9"></IntLevel> 
+<IntLevel NeedPiece="50" Add="10"></IntLevel> 
+<IntLevel NeedPiece="58" Add="11"></IntLevel> 
+<IntLevel NeedPiece="68" Add="12"></IntLevel> 
+<IntLevel NeedPiece="78" Add="13"></IntLevel> 
+<IntLevel NeedPiece="88" Add="14"></IntLevel> 
+<IntLevel NeedPiece="100" Add="15"></IntLevel> 
+<IntLevel NeedPiece="112" Add="16"></IntLevel> 
+<IntLevel NeedPiece="106" Add="17"></IntLevel> 
+<IntLevel NeedPiece="118" Add="18"></IntLevel> 
+<IntLevel NeedPiece="152" Add="19"></IntLevel> 
+<IntLevel NeedPiece="166" Add="20"></IntLevel> 
+<IntLevel NeedPiece="182" Add="21"></IntLevel> 
+<IntLevel NeedPiece="198" Add="22"></IntLevel> 
+<IntLevel NeedPiece="214" Add="23"></IntLevel> 
+<IntLevel NeedPiece="232" Add="24"></IntLevel> 
+<IntLevel NeedPiece="250" Add="25"></IntLevel> 
+<IntLevel NeedPiece="268" Add="26"></IntLevel> 
+<IntLevel NeedPiece="286" Add="27"></IntLevel> 
+<IntLevel NeedPiece="304" Add="28"></IntLevel> 
+<IntLevel NeedPiece="322" Add="29"></IntLevel> 
+<IntLevel NeedPiece="340" Add="30"></IntLevel> 
+<IntLevel NeedPiece="358" Add="31"></IntLevel> 
+<IntLevel NeedPiece="376" Add="32"></IntLevel> 
+<IntLevel NeedPiece="394" Add="33"></IntLevel> 
+<IntLevel NeedPiece="412" Add="34"></IntLevel> 
+<IntLevel NeedPiece="430" Add="35"></IntLevel> 
+<IntLevel NeedPiece="448" Add="36"></IntLevel> 
+<IntLevel NeedPiece="466" Add="37"></IntLevel> 
+<IntLevel NeedPiece="484" Add="38"></IntLevel> 
+<IntLevel NeedPiece="538" Add="41"></IntLevel> 
+<IntLevel NeedPiece="556" Add="42"></IntLevel> 
+<IntLevel NeedPiece="574" Add="43"></IntLevel> 
+<IntLevel NeedPiece="592" Add="44"></IntLevel> 
+<IntLevel NeedPiece="610" Add="45"></IntLevel> 
+<IntLevel NeedPiece="628" Add="46"></IntLevel> 
+<IntLevel NeedPiece="646" Add="47"></IntLevel> 
+<IntLevel NeedPiece="664" Add="48"></IntLevel> 
+<IntLevel NeedPiece="682" Add="49"></IntLevel> 
+<IntLevel NeedPiece="700" Add="50"></IntLevel> 
+<IntLevel NeedPiece="718" Add="51"></IntLevel> 
+<IntLevel NeedPiece="736" Add="52"></IntLevel> 
+<IntLevel NeedPiece="754" Add="53"></IntLevel> 
+<IntLevel NeedPiece="772" Add="54"></IntLevel> 
+<IntLevel NeedPiece="790" Add="55"></IntLevel> 
+<IntLevel NeedPiece="808" Add="56"></IntLevel> 
+<IntLevel NeedPiece="826" Add="57"></IntLevel> 
+<IntLevel NeedPiece="844" Add="58"></IntLevel> 
+<IntLevel NeedPiece="862" Add="59"></IntLevel> 
+<IntLevel NeedPiece="880" Add="60"></IntLevel> 
+<IntLevel NeedPiece="898" Add="61"></IntLevel> 
+<IntLevel NeedPiece="916" Add="62"></IntLevel> 
+<IntLevel NeedPiece="934" Add="63"></IntLevel> 
+<IntLevel NeedPiece="952" Add="64"></IntLevel> 
+<IntLevel NeedPiece="970" Add="65"></IntLevel> 
+<IntLevel NeedPiece="988" Add="66"></IntLevel> 
+<IntLevel NeedPiece="1006" Add="67"></IntLevel> 
+<IntLevel NeedPiece="1024" Add="68"></IntLevel> 
+<IntLevel NeedPiece="1042" Add="69"></IntLevel> 
+<IntLevel NeedPiece="1060" Add="70"></IntLevel> 
+<IntLevel NeedPiece="1078" Add="71"></IntLevel> 
+<IntLevel NeedPiece="1096" Add="72"></IntLevel> 
+<IntLevel NeedPiece="1114" Add="73"></IntLevel> 
+<IntLevel NeedPiece="1132" Add="74"></IntLevel> 
+<IntLevel NeedPiece="1150" Add="75"></IntLevel> 
+<IntLevel NeedPiece="1168" Add="76"></IntLevel> 
+<IntLevel NeedPiece="1186" Add="77"></IntLevel> 
+<IntLevel NeedPiece="1204" Add="78"></IntLevel> 
+<IntLevel NeedPiece="1222" Add="79"></IntLevel> 
+<IntLevel NeedPiece="1240" Add="80"></IntLevel> 
+<IntLevel NeedPiece="1258" Add="81"></IntLevel> 
+<IntLevel NeedPiece="1276" Add="82"></IntLevel> 
+<IntLevel NeedPiece="1294" Add="83"></IntLevel> 
+<IntLevel NeedPiece="1312" Add="84"></IntLevel> 
+<IntLevel NeedPiece="1330" Add="85"></IntLevel> 
+<IntLevel NeedPiece="1348" Add="86"></IntLevel> 
+<IntLevel NeedPiece="1366" Add="87"></IntLevel> 
+<IntLevel NeedPiece="1384" Add="88"></IntLevel> 
+<IntLevel NeedPiece="1402" Add="89"></IntLevel> 
+<IntLevel NeedPiece="1420" Add="90"></IntLevel> 
+<IntLevel NeedPiece="1438" Add="91"></IntLevel> 
+<IntLevel NeedPiece="1456" Add="92"></IntLevel> 
+<IntLevel NeedPiece="1474" Add="93"></IntLevel> 
+<IntLevel NeedPiece="1492" Add="94"></IntLevel> 
+<IntLevel NeedPiece="1510" Add="95"></IntLevel> 
+<IntLevel NeedPiece="1528" Add="96"></IntLevel> 
+<IntLevel NeedPiece="1546" Add="97"></IntLevel> 
+<IntLevel NeedPiece="1564" Add="98"></IntLevel> 
+<IntLevel NeedPiece="1582" Add="99"></IntLevel> 
+</Common>
+
+
+<!--Æê -->
+<FarmPet Index="5000001" Parent="5000001" PetType="N" BaseVIT="2" BaseDEX="3" BaseINT="5">
+<Transfer PetIndex="5000001" Chance="9400" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000002" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000003" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000025" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000004" Parent="5000004" PetType="N" BaseVIT="3" BaseDEX="4" BaseINT="3">
+<Transfer PetIndex="5000004" Chance="9400" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000005" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000006" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000026" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000007" Parent="5000007" PetType="N" BaseVIT="4" BaseDEX="3" BaseINT="3">
+<Transfer PetIndex="5000007" Chance="9400" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000008" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000009" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000027" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000010" Parent="5000010" PetType="N" BaseVIT="2" BaseDEX="4" BaseINT="4">
+<Transfer PetIndex="5000010" Chance="9400" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000011" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000012" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000028" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000013" Parent="5000013" PetType="N" BaseVIT="5" BaseDEX="3" BaseINT="2">
+<Transfer PetIndex="5000013" Chance="9400" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000014" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000015" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000029" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000016" Parent="5000016" PetType="N" BaseVIT="4" BaseDEX="2" BaseINT="4">
+<Transfer PetIndex="5000016" Chance="9400" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000017" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000018" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000030" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000019" Parent="5000019" PetType="N" BaseVIT="3" BaseDEX="5" BaseINT="2">
+<Transfer PetIndex="5000019" Chance="9400" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000020" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000021" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000031" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000022" Parent="5000022" PetType="N" BaseVIT="3" BaseDEX="3" BaseINT="4">
+<Transfer PetIndex="5000022" Chance="9400" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000023" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000024" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000032" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000002" Parent="5000001" PetType="R" BaseVIT="4" BaseDEX="6" BaseINT="10">
+<Transfer PetIndex="5000001" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000002" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000003" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000025" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+
+</FarmPet>
+
+<FarmPet Index="5000005" Parent="5000004" PetType="R" BaseVIT="6" BaseDEX="8" BaseINT="6">
+<Transfer PetIndex="5000004" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000005" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000006" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000026" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000008" Parent="5000007" PetType="R" BaseVIT="8" BaseDEX="6" BaseINT="6">
+<Transfer PetIndex="5000007" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000008" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000009" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000027" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000011" Parent="5000010" PetType="R" BaseVIT="4" BaseDEX="8" BaseINT="8">
+<Transfer PetIndex="5000010" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000011" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000012" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000028" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000014" Parent="5000013" PetType="R" BaseVIT="10" BaseDEX="6" BaseINT="4">
+<Transfer PetIndex="5000013" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000014" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000015" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000029" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000017" Parent="5000016" PetType="R" BaseVIT="8" BaseDEX="4" BaseINT="8">
+<Transfer PetIndex="5000016" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000017" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000018" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000030" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000020" Parent="5000019" PetType="R" BaseVIT="6" BaseDEX="10" BaseINT="4">
+<Transfer PetIndex="5000019" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000020" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000021" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000031" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000023" Parent="5000022" PetType="R" BaseVIT="6" BaseDEX="6" BaseINT="8">
+<Transfer PetIndex="5000022" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000023" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000024" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000032" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000003" Parent="5000001" PetType="R" BaseVIT="4" BaseDEX="6" BaseINT="10">
+<Transfer PetIndex="5000001" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000002" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000003" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000025" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000006" Parent="5000004" PetType="R" BaseVIT="6" BaseDEX="8" BaseINT="6">
+<Transfer PetIndex="5000004" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000005" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000006" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000026" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000009" Parent="5000007" PetType="R" BaseVIT="8" BaseDEX="6" BaseINT="6">
+<Transfer PetIndex="5000007" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000008" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000009" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000027" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000012" Parent="5000010" PetType="R" BaseVIT="4" BaseDEX="8" BaseINT="8">
+<Transfer PetIndex="5000010" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000011" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000012" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000028" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000015" Parent="5000013" PetType="R" BaseVIT="10" BaseDEX="6" BaseINT="4">
+<Transfer PetIndex="5000013" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000014" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000015" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000029" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000018" Parent="5000016" PetType="R" BaseVIT="8" BaseDEX="4" BaseINT="8">
+<Transfer PetIndex="5000016" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000017" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000018" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000030" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000021" Parent="5000019" PetType="R" BaseVIT="6" BaseDEX="10" BaseINT="4">
+<Transfer PetIndex="5000019" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000020" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000021" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000031" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000024" Parent="5000022" PetType="R" BaseVIT="6" BaseDEX="6" BaseINT="8">
+<Transfer PetIndex="5000022" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000023" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000024" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000032" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000025" Parent="5000001" PetType="U" BaseVIT="12" BaseDEX="10" BaseINT="8">
+<Transfer PetIndex="5000001" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000002" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000003" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000025" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000026" Parent="5000004" PetType="U" BaseVIT="8" BaseDEX="12" BaseINT="10">
+<Transfer PetIndex="5000004" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000005" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000006" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000026" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000027" Parent="5000007" PetType="U" BaseVIT="14" BaseDEX="6" BaseINT="10">
+<Transfer PetIndex="5000007" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000008" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000009" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000027" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000028" Parent="5000010" PetType="U" BaseVIT="7" BaseDEX="13" BaseINT="10">
+<Transfer PetIndex="5000010" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000011" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000012" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000028" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000029" Parent="5000013" PetType="U" BaseVIT="15" BaseDEX="5" BaseINT="10">
+<Transfer PetIndex="5000013" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000014" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000015" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000029" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000030" Parent="5000016" PetType="U" BaseVIT="12" BaseDEX="12" BaseINT="6">
+<Transfer PetIndex="5000016" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000017" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000018" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000030" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000031" Parent="5000019" PetType="U" BaseVIT="10" BaseDEX="10" BaseINT="10">
+<Transfer PetIndex="5000019" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000020" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000021" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000031" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000032" Parent="5000022" PetType="U" BaseVIT="11" BaseDEX="9" BaseINT="10">
+<Transfer PetIndex="5000022" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000023" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000024" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000032" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+
+<FarmPet Index="5000033" Parent="5000033" PetType="N" BaseVIT="3" BaseDEX="3" BaseINT="4">
+<Transfer PetIndex="5000033" Chance="9400" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000034" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000035" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000036" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000034" Parent="5000033" PetType="R" BaseVIT="4" BaseDEX="6" BaseINT="10">
+<Transfer PetIndex="5000033" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000034" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000035" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000036" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+
+</FarmPet>
+
+<FarmPet Index="5000035" Parent="5000033" PetType="R" BaseVIT="6" BaseDEX="8" BaseINT="6">
+<Transfer PetIndex="5000033" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000034" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000035" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000036" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000036" Parent="5000033" PetType="U" BaseVIT="11" BaseDEX="9" BaseINT="10">
+<Transfer PetIndex="5000033" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000034" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000035" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000036" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+
+<FarmPet Index="5000037" Parent="5000037" PetType="N" BaseVIT="3" BaseDEX="3" BaseINT="4">
+<Transfer PetIndex="5000037" Chance="9400" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000038" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000039" Chance="250" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000040" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000038" Parent="5000037" PetType="R" BaseVIT="4" BaseDEX="6" BaseINT="10">
+<Transfer PetIndex="5000037" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000038" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000039" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000040" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+
+</FarmPet>
+
+<FarmPet Index="5000039" Parent="5000037" PetType="R" BaseVIT="6" BaseDEX="8" BaseINT="6">
+<Transfer PetIndex="5000037" Chance="8900" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000038" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000039" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000040" Chance="100" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000040" Parent="5000037" PetType="U" BaseVIT="11" BaseDEX="9" BaseINT="10">
+<Transfer PetIndex="5000037" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000038" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000039" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000040" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+<FarmPet Index="5000041" Parent="5000041" PetType="N" BaseVIT="3" BaseDEX="4" BaseINT="3">
+<Transfer PetIndex="5000041" Chance="8500" PriceType="L" Price="0" BasePoint="10" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000042" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000043" Chance="500" PriceType="L" Price="0" BasePoint="20" TaxRate="0"></Transfer>
+<Transfer PetIndex="5000044" Chance="500" PriceType="L" Price="0" BasePoint="30" TaxRate="0"></Transfer>
+</FarmPet>
+
+
+
+
+
+
+
+

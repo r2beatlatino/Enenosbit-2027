@@ -1,0 +1,11 @@
+{
+  "disasterHappenTime": 3600,
+  "takeFruitMax": 15,
+  "takeFruitMin": 10,
+  "retain": 5,
+  "natHazHelpCount": 10,
+  "initLand": 4,
+  "uploadLandItem": 11006861,
+  "maxStealTimes": 100,
+  "maxDisLayer": 3
+}

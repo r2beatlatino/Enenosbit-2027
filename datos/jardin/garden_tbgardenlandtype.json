@@ -1,0 +1,108 @@
+[
+  {
+    "landType": 1,
+    "notes": "普通土地",
+    "useSumCoinName": "nUseSumCoin",
+    "useGCoinName": "",
+    "useLevelName": "useLevel",
+    "bUpLand": 1,
+    "buyType": [
+      3
+    ],
+    "yieldUp": 0,
+    "timeDown": 0,
+    "expUp": 0,
+    "grade": 50
+  },
+  {
+    "landType": 2,
+    "notes": "红土地",
+    "useSumCoinName": "rUseSumCoin",
+    "useGCoinName": "rUseCashItemCount",
+    "useLevelName": "upRedLand",
+    "bUpLand": 1,
+    "buyType": [
+      3,
+      1
+    ],
+    "yieldUp": 10,
+    "timeDown": 0,
+    "expUp": 0,
+    "grade": 150
+  },
+  {
+    "landType": 3,
+    "notes": "黑土地",
+    "useSumCoinName": "",
+    "useGCoinName": "bUseCashItemCount",
+    "useLevelName": "upBlackLand",
+    "bUpLand": 2,
+    "buyType": [
+      1
+    ],
+    "yieldUp": 20,
+    "timeDown": 20,
+    "expUp": 0,
+    "grade": 300
+  },
+  {
+    "landType": 4,
+    "notes": "金土地",
+    "useSumCoinName": "",
+    "useGCoinName": "gUseCashItemCount",
+    "useLevelName": "upGoldLand",
+    "bUpLand": 3,
+    "buyType": [
+      1
+    ],
+    "yieldUp": 20,
+    "timeDown": 20,
+    "expUp": 20,
+    "grade": 450
+  },
+  {
+    "landType": 5,
+    "notes": "紫晶土地",
+    "useSumCoinName": "",
+    "useGCoinName": "pgUseCashItemCount",
+    "useLevelName": "upPurpleGoldLand",
+    "bUpLand": 4,
+    "buyType": [
+      1
+    ],
+    "yieldUp": 25,
+    "timeDown": 25,
+    "expUp": 25,
+    "grade": 600
+  },
+  {
+    "landType": 6,
+    "notes": "蓝晶土地",
+    "useSumCoinName": "",
+    "useGCoinName": "blUseCashItemCount",
+    "useLevelName": "upBlueGoldLand",
+    "bUpLand": 5,
+    "buyType": [
+      1
+    ],
+    "yieldUp": 25,
+    "timeDown": 25,
+    "expUp": 30,
+    "grade": 750
+  },
+  {
+    "landType": 7,
+    "notes": "黑晶土地",
+    "useSumCoinName": "",
+    "useGCoinName": "blaUseCashItemCount",
+    "useLevelName": "upBlackGoldLand",
+    "bUpLand": 6,
+    "buyType": [
+      1
+    ],
+    "yieldUp": 30,
+    "timeDown": 30,
+    "expUp": 35,
+    "grade": 900
+  }
+]

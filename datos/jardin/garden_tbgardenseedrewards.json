@@ -1,0 +1,148 @@
+{
+  "90000001": {
+    "code": 90000001,
+    "name": "萝卜种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000002": {
+    "code": 90000002,
+    "name": "玉米种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000003": {
+    "code": 90000003,
+    "name": "土豆种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000004": {
+    "code": 90000004,
+    "name": "茄子种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000005": {
+    "code": 90000005,
+    "name": "辣椒种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000006": {
+    "code": 90000006,
+    "name": "包菜种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000007": {
+    "code": 90000007,
+    "name": "香蕉种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000008": {
+    "code": 90000008,
+    "name": "苹果种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000009": {
+    "code": 90000009,
+    "name": "桃子种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000010": {
+    "code": 90000010,
+    "name": "西瓜种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000011": {
+    "code": 90000011,
+    "name": "芒果种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000012": {
+    "code": 90000012,
+    "name": "小雏菊种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000013": {
+    "code": 90000013,
+    "name": "红玫瑰种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000014": {
+    "code": 90000014,
+    "name": "非洲菊种子",
+    "title": "",
+    "rewards": [],
+    "isSendMail": false
+  },
+  "90000015": {
+    "code": 90000015,
+    "name": "可爱雪人种子",
+    "title": "",
+    "rewards": [
+      {
+        "id": 11001977,
+        "idCode": 11000977
+      }
+    ],
+    "isSendMail": false
+  },
+  "90000016": {
+    "code": 90000016,
+    "name": "滑板西瓜种子",
+    "title": "",
+    "rewards": [
+      {
+        "id": 11001976,
+        "idCode": 11000976
+      }
+    ],
+    "isSendMail": false
+  },
+  "90000017": {
+    "code": 90000017,
+    "name": "万圣南瓜种子",
+    "title": "",
+    "rewards": [
+      {
+        "id": 11001975,
+        "idCode": 11000975
+      }
+    ],
+    "isSendMail": false
+  },
+  "90000018": {
+    "code": 90000018,
+    "name": "人参果精灵种子",
+    "title": "",
+    "rewards": [
+      {
+        "id": 11001974,
+        "idCode": 11000974
+      }
+    ],
+    "isSendMail": false
+  }
+}

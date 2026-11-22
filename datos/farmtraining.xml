@@ -1,0 +1,12 @@
+<Training>
+	<!-- 훈련건물 데이터 설정-->
+	<Building Index="5200001" Level="1" Ability="VIT" Energy="3" TrainingTime="1800" MinEXP="12" MaxEXP="12" MinPiece="1" MaxPiece="1" PriceType="L" Price="500"></Building>
+	<Building Index="5200002" Level="1" Ability="DEX" Energy="3" TrainingTime="1800" MinEXP="12" MaxEXP="12" MinPiece="1" MaxPiece="1" PriceType="L" Price="500"></Building>
+	<Building Index="5200003" Level="10" Ability="DEX" Energy="3" TrainingTime="7200" MinEXP="48" MaxEXP="48" MinPiece="4" MaxPiece="4" PriceType="L" Price="2000"></Building>
+	<Building Index="5200004" Level="10" Ability="VIT" Energy="3" TrainingTime="7200" MinEXP="48" MaxEXP="48" MinPiece="4" MaxPiece="4" PriceType="L" Price="2000"></Building>
+	<Building Index="5200005" Level="1" Ability="INT" Energy="3" TrainingTime="1800" MinEXP="12" MaxEXP="12" MinPiece="1" MaxPiece="1" PriceType="L" Price="500"></Building>
+	<Building Index="5200006" Level="10" Ability="INT" Energy="3" TrainingTime="7200" MinEXP="48" MaxEXP="48" MinPiece="4" MaxPiece="4" PriceType="L" Price="2000"></Building>
+	<Building Index="5200007" Level="20" Ability="DEX" Energy="3" TrainingTime="16200" MinEXP="108" MaxEXP="108" MinPiece="9" MaxPiece="9" PriceType="L" Price="4500"></Building>
+	<Building Index="5200008" Level="20" Ability="INT" Energy="3" TrainingTime="16200" MinEXP="108" MaxEXP="108" MinPiece="9" MaxPiece="9" PriceType="L" Price="4500"></Building>
+	<Building Index="5200009" Level="20" Ability="VIT" Energy="3" TrainingTime="16200" MinEXP="108" MaxEXP="108" MinPiece="9" MaxPiece="9" PriceType="L" Price="4500"></Building>
+</Training>

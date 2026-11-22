@@ -1,0 +1,43 @@
+{
+"gemas": {
+"11000961": {
+"ftype": 9,
+"param": [
+400,
+200
+],
+"shopIndexList": [
+8
+]
+},
+"11000962": {
+"ftype": 8,
+"param": [
+400,
+200
+],
+"shopIndexList": [
+8
+]
+},
+"11000963": {
+"ftype": 10,
+"param": [
+1
+],
+"shopIndexList": [
+8
+]
+},
+"11000964": {
+"ftype": 5,
+"param": [
+0
+],
+"shopIndexList": [
+25
+]
+}
+},
+"pak_md5": "(carpeta dada)"
+}
