@@ -1,0 +1,18 @@
+# lo que crea el server al correr
+registros/
+datos_vps/
+__pycache__/
+*.pyc
+
+# ⛔ datos de una cuenta o capturas del oficial: NUNCA van al repo (los caza vps/guardia_datos.py)
+datos/cuenta*.json
+datos/cuentas.json
+datos/amigos.json
+datos/parejas.json
+datos/tienda.json
+datos/respaldo_*
+datos/*_S2C.bin
+datos/*.hex
+datos/idioma_*
+datos/isla/
+*.lock
