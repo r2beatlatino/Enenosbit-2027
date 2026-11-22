@@ -37,6 +37,32 @@ def anotar(txt):
     estado.anotar(txt)
 
 
+def llave(nombre):
+    return os.environ.get(nombre, "1").strip().lower() not in ("0", "no", "false", "")
+
+
+def _a_bytes(v):
+    if not v:
+        return b""
+    return v.encode("latin1") if isinstance(v, str) else bytes(v)
+
+
+def _clave_de_ff0f(cuerpo):
+    """Saca la clave (bytes) de un C2S FF0F SendJoinRoom, o b"" si viene sin clave (<= 6 B).
+    En el cliente moderno (0x02765cc0 / 0x008c1f20 / 0x009f8d7a y lobby_salas._clave_del_ff11 camino A):
+    [u16 A][u8 flag][u8 len][clave...][u8][u8] (@3 = largo). Acepta tambien @6 o @7 (2013) o cola cruda."""
+    if len(cuerpo) <= 6:
+        return b""
+    for pos in (3, 6, 7, 2):
+        if pos < len(cuerpo):
+            n = cuerpo[pos]
+            if 1 <= n <= 32 and pos + 1 + n <= len(cuerpo):
+                tramo = cuerpo[pos + 1:pos + 1 + n]
+                if all(0x20 <= b < 0x7F for b in tramo):
+                    return bytes(tramo)
+    return cuerpo[6:].split(b"\x00", 1)[0]
+
+
 def jugadores(sala):
     """Las conexiones sentadas en la sala, por numero de asiento (una vista de `sala.asientos`)."""
     return [sala.asientos[k] for k in sorted(sala.asientos)]
@@ -505,10 +531,18 @@ def avisar_equipos(sala, solo=None):
               "todos" if solo is None else (solo.cuenta or {}).get("nick")))
 
 
-def sentar_y_avisar(con, sala, seq):
+def sentar_y_avisar(con, sala, seq=0, clave=b""):
     """Lo comun de unirse (clic en la sala o entrada rapida). Orden medido en la grabacion 213306 (nota 06 §6):
     FF12D, FF0C, FF232, FF0F [asiento][tipo 0][0]x6, FF167, FF246 room.joinRoom, FF15 la sala, FF0C, FF17 por asiento.
     A los que ya estaban: el FF0C nuevo."""
+    if isinstance(seq, (bytes, str)):
+        clave, seq = seq, 0
+    if llave("SALA_CLAVE"):
+        clave_sala = _a_bytes(getattr(sala, "clave", b""))
+        if clave_sala and _a_bytes(clave) != clave_sala:
+            con.mandar_interno(0x0F, seq, bytes([0x0E, 0, 0, 0]) + bytes(4))     # 0x0E: clave incorrecta (0x02789f29 -> 0x1ba)
+            anotar("   S2C FF0F 0x0E: clave incorrecta para la sala %d" % sala.numero)
+            return True
     sacar_de_su_sala(con)
     asiento = sentar(sala, con)
     if asiento is None:
@@ -550,14 +584,24 @@ def sentar_y_avisar(con, sala, seq):
     return True
 
 
+def unirse_sala(con, sala, seq=0, clave=b""):
+    """Mete a `con` en `sala` comprobando `sala.clave` (si SALA_CLAVE=1). Devuelve True si entro, False si fue rechazado."""
+    if isinstance(seq, (bytes, str)):
+        clave, seq = seq, 0
+    sentar_y_avisar(con, sala, seq, clave=clave)
+    return con in sala.asientos.values()
+
+
 def rapida(con, seq, cuerpo):
     """C2S FF1F7 SendQuickJoin3 (6 B: [u8][u32 mascara de modos][u8]). Sin sala que sirva: FF72 `0d` (lo que mando el
     oficial en la grabacion 215530 sin salas)."""
     if len(cuerpo) != 6:
         return False
     mascara = struct.unpack_from("<I", cuerpo, 1)[0]
+    con_clave = llave("SALA_CLAVE")
     sala = next((s for s in estado.SALAS.values() if (s.modo & mascara or not mascara) and len(s.asientos) < s.max
-                 and s.estado & 0x02 == 0 and con not in jugadores(s)), None)
+                 and s.estado & 0x02 == 0 and not (con_clave and _a_bytes(getattr(s, "clave", b"")))
+                 and con not in jugadores(s)), None)
     if sala is None:
         con.mandar_interno(0x72, seq, b"\x0d")
         anotar("   S2C FF72 0d: entrada rapida sin sala libre")
@@ -576,7 +620,7 @@ def unirse(con, seq, cuerpo):
         con.mandar_interno(0x0F, seq, bytes([0x1A, 0, 0, 0]) + bytes(4))     # 0x1A: no se puede entrar
         anotar("   S2C FF0F 0x1A: la sala %d no existe (pedido %s)" % (numero, cuerpo.hex()))
         return True
-    return sentar_y_avisar(con, sala, seq)
+    return sentar_y_avisar(con, sala, seq, clave=_clave_de_ff0f(cuerpo))
 
 
 def info_por_numero(con, seq, cuerpo):
@@ -727,6 +771,34 @@ def _de_anfitrion(con, nombre):
         anotar("   C2S %s de quien no es el anfitrion (o sin sala): no se cambia nada" % nombre)
         return None
     return sala
+
+
+def pasar_anfitrion(con, seq, cuerpo):
+    """M05. C2S FF9B SendChangeCreator [u8 asiento] (0x027d4090) -> S2C FF9B CmdChangeCreator [u8 asiento][0][0] (0x027d44c0)
+    y FF15 con byte 2 = asiento del nuevo anfitrion a todos los de la sala."""
+    if not llave("SALA_ANFITRION"):
+        return False
+    if len(cuerpo) != 1:
+        return False
+    sala = _de_anfitrion(con, "FF9B")
+    if sala is None:
+        return True
+    asiento = cuerpo[0] & 0x7F
+    nuevo = sala.asientos.get(asiento)
+    if sala.carrera is not None or nuevo is None or nuevo is con:
+        return True
+    sala.anfitrion = nuevo
+    quitar_listo = bool(nuevo.listo)
+    nuevo.listo = 0
+    aviso = bytes([asiento, 0, 0])
+    for c in jugadores(sala):
+        if quitar_listo:
+            c.mandar_interno(0x17, 0, bytes([0, asiento, 0]))
+        c.mandar_interno(0x9B, seq if c is con else 0, aviso)
+    _mandar_ff15_a_todos(sala)
+    anotar("   FF9B pasar anfitrion a asiento %d en sala %d -> FF9B y FF15 a %d"
+           % (asiento, sala.numero, len(sala.asientos)))
+    return True
 
 
 def _mandar_ff15_a_todos(sala):
@@ -927,6 +999,7 @@ def cambiar_modo(con, seq, cuerpo):
 MANEJADORES = {
     0x20: expulsar,
     0x18: cambiar_equipo,
+    0x9B: pasar_anfitrion,
     0x1F6: lista,
     0x1B: elegir_pista,
     0x79: selector,
