@@ -12,6 +12,7 @@ import time
 
 import ajustes
 import captura
+import estado
 import textos
 
 # ---------- Hueco 1: saludo FF04 y login del juego FF02 (sin juego_S2C.bin) ----------
@@ -33,6 +34,33 @@ def ff02_cuerpo(clave, llave):
     x = (llave ^ captura.LLAVE_SAL) & 0xFFFFFFFF if llave is not None else 0
     # INVENTADO: semilla = 0 en +5..+9 y cola = 4 ceros al final
     return bytes([0]) + struct.pack("<II", x, FF02_SEMILLA) + clave + bytes(4)
+
+
+def ff05_cuerpo(llave=None):
+    """S2C FF05 CmdAck (0x0277b240) de 20 B: [u32 X = llave ^ LLAVE_SAL][16 B en 0]."""
+    x = (llave ^ captura.LLAVE_SAL) & 0xFFFFFFFF if llave is not None else 0
+    # INVENTADO: los 16 B restantes (otros dos u32 leidos en 0x0277b240 y 8 B de cola) en 0.
+    return struct.pack("<I", x) + bytes(16)
+
+
+def ff247_cuerpo():
+    """S2C FF247 CmdFunction (0x028713f0) de 1 B: [u8 1] (33 de 33 en las grabaciones)."""
+    return b"\x01"
+
+
+def ff49_cabeza_cola(cuenta):
+    """Cabeza y cola neutras de S2C FF49 CmdGetDressList (0x02781660, layouts/FF49.md) sin plantilla capturada."""
+    pj = (cuenta or {}).get("personaje")
+    if pj:
+        partes = list(pj.get("partes") or [])
+        cid = int(pj.get("char_id", 0)) & 0xFFFFFFFF
+        cabeza = struct.pack("<IHIB", cid, 1, cid, len(partes)) + struct.pack("<%dI" % len(partes), *partes)
+    else:
+        # INVENTADO: sin personaje, char_id = 0 y lista de personajes vacia (n = 0).
+        cabeza = struct.pack("<IH", 0, 0)
+    # INVENTADO: cola de 35 B en 0 (#14 a=0, #15 b=0 sin lista #16-#17, #18 c=0 sin lista #19-#23, #24..#31 6x u32 + 2x u16 en 0).
+    cola = bytes(35)
+    return cabeza, cola
 
 
 def envolver_ff56(cmd, seq, cuerpo):
@@ -160,8 +188,41 @@ def ff00_lote(cuenta, seq=0):
 
 
 def lotes_entrada(cuenta):
-    """Rafaga minima neutra de entrada cuando falta datos/lotes_S2C.bin."""
-    return [ff00_lote(cuenta)]
+    """Rafaga neutra de entrada cuando falta datos/lotes_S2C.bin (llave RAFAGA_NEUTRA_EXTRA)."""
+    lotes = [ff00_lote(cuenta)]
+    if os.environ.get("RAFAGA_NEUTRA_EXTRA", "1").lower() not in ("1", "si") or not cuenta:
+        return lotes
+    try:
+        import tienda
+        if tienda.saldos_al_dia():
+            d = min(0xFFFFFFFF, max(0, int(tienda.diamantes_de_cuenta(cuenta))))
+            lotes.append(envolver_ff56(0x51, 0, b"\x01" + struct.pack("<I", d)))
+    except Exception as e:                                           # noqa: BLE001
+        estado.anotar("   ⛔ neutro.lotes_entrada FF51: %r" % e)
+    cuerpos_prog = None
+    try:
+        import progresion
+        cuerpos_prog = progresion.cuerpos(cuenta)
+        if cuerpos_prog is not None:
+            lotes.append(envolver_ff56(0x1FE, 0, cuerpos_prog[1]))
+    except Exception as e:                                           # noqa: BLE001
+        estado.anotar("   ⛔ neutro.lotes_entrada FF1FE: %r" % e)
+    try:
+        import progresion
+        if cuerpos_prog is None and progresion.activo():
+            cuerpos_prog = progresion.cuerpos(cuenta)
+        if cuerpos_prog is not None:
+            lotes.append(envolver_ff56(0x1F9, 0, cuerpos_prog[0]))
+    except Exception as e:                                           # noqa: BLE001
+        estado.anotar("   ⛔ neutro.lotes_entrada FF1F9: %r" % e)
+    try:
+        import gemas
+        cu_272 = gemas.cuerpo(cuenta)
+        if cu_272 is not None:
+            lotes.append(envolver_ff56(0x272, 0, cu_272))
+    except Exception as e:                                           # noqa: BLE001
+        estado.anotar("   ⛔ neutro.lotes_entrada FF272: %r" % e)
+    return lotes
 
 
 # ---------- Ficha 171: sala sin crear_sala_S2C.bin ----------

@@ -42,8 +42,9 @@ La lista exacta para copiar esta en [`archivos_que_viajan.txt`](archivos_que_via
 | `HOSTS` | `0.0.0.0` | Escucha en todas las interfaces |
 | `IP_JUEGO` | `<IP publica del VPS>` | IP que `FF03` anuncia al cliente |
 | `PUERTOS` | `28004` | Puerto del servidor de login |
-| `PUERTOS_JUEGO` | `28008` | Puerto base del servidor de juego |
-| `PUERTO_CUENTAS` | `28101` | Primer puerto de cuentas nuevas (`28101..28108` + `28109`) |
+| `PUERTOS_JUEGO` | `28008` | Puerto base del servidor de juego (compartido por todas las cuentas con `IDENTIDAD_FF02=si`) |
+| `IDENTIDAD_FF02` | `si` (omision) | Con `PASE=si`, identifica la cuenta por el `C2S FF02` del puerto de juego `28008` y quita el tope de 8 cuentas (`0` vuelve a puerto por cuenta y tope 8) |
+| `PUERTO_CUENTAS` | `28101` | Primer puerto de cuentas nuevas (`28101..28108` + `28109`; solo se usa si `IDENTIDAD_FF02=0`) |
 | `CUENTA_DATOS` | `/ruta/datos_cuentas` | Carpeta vacia/persistente donde se crea `cuenta.json` |
 | `MUSICA_2013` | `1` (omision en `arrancar.sh` y `Dockerfile`) | Catalogo 2013 de `datos/musica_2013` (ficha 179). SOLO con el cliente que trae `rnr_musica2013.pak` y `rnr_music2013_*.pak`: con uno viejo, 9 canciones lo cierran |
 | `SIN_CANAL_BAILE` | `1` (omision) | Modo Baile abre en el servidor de siempre (ficha 175) |
@@ -53,9 +54,11 @@ Opcional: `R2_CUENTAS_URL` si no se pasa `R2_CUENTAS_CLAVE_PUBLICA` (consulta `/
 
 ## 3. Puertos TCP a abrir
 
+Con `IDENTIDAD_FF02=si` (por omision en modo `PASE=si`) solo hacen falta `28004` y `28008`. Los `28101..28109` pueden quedar abiertos sin dano (solo se usan si se apaga la llave con `IDENTIDAD_FF02=0`).
+
 - `28004/tcp` (login)
 - `28008/tcp` (juego)
-- `28101-28109/tcp` (puertos por cuenta)
+- `28101-28109/tcp` (opcionales con la llave prendida; pueden quedar abiertos sin dano)
 
 ## 4. Como armar y arrancar en Linux
 

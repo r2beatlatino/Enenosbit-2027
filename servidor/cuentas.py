@@ -42,6 +42,11 @@ GSN_CAPTURADA = ajustes.numero_capturado(ajustes.RUTA_LOGIN_CAP, 1, 4)
 MARCA_COPIA = 0x52420000
 
 
+def identidad_ff02():
+    """True si pase_activo() y la llave IDENTIDAD_FF02 esta prendida."""
+    return ajustes.identidad_ff02()
+
+
 def cargar():
     """{"cuentas": [...]} en el formato viejo, solo lectura. Si el archivo esta roto: CuentaError."""
     return {"cuentas": _cuenta.todas_planas()}
@@ -254,9 +259,12 @@ def alta(steamid, gsn=None, capturada=False):
                 "personaje": {"char_id": 130900},
             }
         locales = sum(1 for u in usuarios.values() if not u.get("capturada"))
-        puerto = _siguiente_puerto(d)
-        if locales >= MAX_CUENTAS or puerto is None:
-            return None
+        if identidad_ff02():
+            puerto = ajustes.PUERTOS_JUEGO[0]
+        else:
+            puerto = _siguiente_puerto(d)
+            if locales >= MAX_CUENTAS or puerto is None:
+                return None
         gsn_nuevo = _siguiente_gsn(d)
         usn_nuevo = _siguiente_usn(d)
         nick = _nick_para(steamid, locales, d["cuentas"])

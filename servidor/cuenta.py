@@ -427,3 +427,28 @@ def usuario_por_puerto(puerto):
         if u.get("puerto") == puerto:
             return copy.deepcopy(u)
     return None
+
+
+def guardar_sesion(gsn, datos_sesion):
+    """Con el candado: guarda datos_sesion en d['sesiones'][str(gsn)] y poda las sesiones vencidas."""
+    ahora = time.time()
+
+    def f(d):
+        sesiones = d.setdefault("sesiones", {})
+        for k in [k for k, v in list(sesiones.items()) if not isinstance(v, dict) or v.get("expira", 0) < ahora]:
+            del sesiones[k]
+        clave_g = str(gsn)
+        sesiones[clave_g] = {
+            "clave": str(datos_sesion["clave"]),
+            "sesion_id": int(datos_sesion["sesion_id"]),
+            "usuario": str(datos_sesion["usuario"]),
+            "expira": float(datos_sesion["expira"]),
+        }
+        return copy.deepcopy(sesiones[clave_g])
+    return cambiar_todas(f)
+
+
+def sesion(gsn):
+    """La sesion guardada de ese gsn (copia) o None."""
+    s = (_cargar().get("sesiones") or {}).get(str(gsn))
+    return copy.deepcopy(s) if isinstance(s, dict) else None
