@@ -74,3 +74,22 @@ def mas_tarde(segundos, destino, *args):
     except RuntimeError:
         bucle = asyncio.get_event_loop()
     return bucle.call_later(segundos, _disparar, destino, args)
+
+
+# 23-nov (maduracion M19): cuantos jugadores CON CUENTA hay conectados al juego, para que login.py lo ponga en la lista de
+# canales (FF03, el contador "usuarios/maximo"). login y juego son procesos distintos: va a un archivo chico junto a las
+# cuentas, escrito de una (temporal + replace).
+def anotar_en_linea():
+    import json
+    import os
+    import time
+    try:
+        import ajustes
+        n = sum(1 for c in list(CONEXIONES.values()) if getattr(c, "cuenta", None))
+        ruta = os.path.join(ajustes.carpeta_cuenta(), "en_linea.json")
+        tmp = "%s.tmp%d" % (ruta, os.getpid())
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump({"n": n, "t": time.time()}, f)
+        os.replace(tmp, ruta)
+    except Exception:                                            # noqa: BLE001
+        pass
