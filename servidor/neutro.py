@@ -23,6 +23,15 @@ FF02_SEMILLA = 0  # INVENTADO: semilla XOR del FF02 neutro (4 B en +5)
 # ficha 183: los escenarios (pistas) del FF00 en modo VPS = los del oficial (ver ficha_cuenta)
 ESCENARIOS = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 56, 58, 0x4000, 0x4001, 0x4002, 0x4003, 0x4005)
 
+def rnote_llaves():
+    """23-nov (maduracion M22, LEIDO en el exe): el contador RNoteKey ([cAccount+0x1308]) que el cliente exige > 0 para crear o
+    pasar a una sala R-Note (si no, mensaje 1794 «no tenes entrada»). Lo llenan FF00 #121 (u16), FF49 #30 (u16, pisa al del
+    FF00) y, por jugador, FF0C #75. RNOTE_LLAVES (por omision 99, pedido del dueño: "varias unidades"); 0 = como antes.
+    El servidor NO lo descuenta por partida (el oficial gastaba con FF6A + FF1EE: sin hacer)."""
+    v = (os.environ.get("RNOTE_LLAVES") or "99").strip()
+    return max(0, min(65535, int(v))) if v.isdigit() else 0
+
+
 def ff04_cabeza():
     """Cabeza de 21 B de S2C FF04 (antes del u32 timestamp). CmdCheckVer (0x0277b410) solo lee el byte 0 (0 = OK)."""
     # INVENTADO: bytes 1..20 en cero salvo version=4 en +1..+5; el cliente solo lee byte 0
@@ -59,8 +68,9 @@ def ff49_cabeza_cola(cuenta):
         # INVENTADO: sin personaje, char_id = 0 y lista de personajes vacia (n = 0).
         cabeza = struct.pack("<IH", 0, 0)
     # INVENTADO: cola de 35 B en 0 (#14 a=0, #15 b=0 sin lista #16-#17, #18 c=0 sin lista #19-#23, #24..#31 6x u32 + 2x u16 en 0).
-    cola = bytes(35)
-    return cabeza, cola
+    cola = bytearray(35)
+    struct.pack_into("<H", cola, 31, rnote_llaves())         # #30 RNoteKey (M22): pisa al del FF00, va igual
+    return cabeza, bytes(cola)
 
 
 def envolver_ff56(cmd, seq, cuerpo):
@@ -179,7 +189,9 @@ def ff00_cuerpo(cuenta):
     #   + #90..#96(28) + #97(1) + #100..#103(10) + #105(2) + #111..#120(40) + #121(2) + #122(1)
     #   + #123(25) + #124(4) + #126(1) + #128..#130(12) + #131(61) + #132..#133(5)
     #   + #134..#135(8) + #136..#138(3) + #139..#141(12) = 276 bytes
-    out += bytes(276)
+    cola = bytearray(276)
+    struct.pack_into("<H", cola, 143, rnote_llaves())        # #121 RNoteKey (M22; 143 = suma del desglose de arriba)
+    out += bytes(cola)
     return bytes(out)
 
 
@@ -234,6 +246,7 @@ def cola_jugador_sala():
     # y cantidad x u32, #91 u32. Con cantidad=0 los 44 B extra se
     # interpretan como el jugador siguiente. INVENTADO: 11 casillas vacias.
     struct.pack_into('<I', cola, 170, 11)
+    struct.pack_into('<H', cola, 131, rnote_llaves())   # #75 RNoteKey del jugador (M22: camino de crear sala desde el chat)
     return bytes(cola)
 
 
