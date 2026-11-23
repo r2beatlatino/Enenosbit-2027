@@ -13,7 +13,10 @@ esta en el lobby.
 import os
 import struct
 
+import circulo
+import cupon
 import estado
+import gm
 import salas
 import textos
 
@@ -53,6 +56,9 @@ def susurrar(con, seq, cuerpo):
     texto = cuerpo[2:130].split(b"\0", 1)[0]
     if not yo.get("usn") or not texto:
         return False
+    if gm.esta_silenciado(con):
+        anotar("   FF1F4 susurro bloqueado (silenciado): %s" % yo.get("nick"))
+        return True
     mi_nick = social._gbk(yo.get("nick", ""), 13)
     if tipo == 4:
         if len(cuerpo) != 134:
@@ -96,6 +102,12 @@ def hablar(con, seq, cuerpo):
     if len(cuerpo) != 130:
         return False
     texto = cuerpo[2:130].split(b"\0", 1)[0]
+    if gm.atender(con, texto):
+        return True
+    if cupon.atender(con, texto):
+        return True
+    if circulo.atender(con, texto):
+        return True
     sala = estado.SALAS.get(con.sala)
     destinos = salas.jugadores(sala) if sala is not None else list(estado.CONEXIONES.values())
     r = registro(con, cuerpo).ljust(592, b"\0")
@@ -127,11 +139,17 @@ def hablar_en_carrera(con, seq, cuerpo):
     siempre estuvieron juntos)."""
     if len(cuerpo) < 1 or len(cuerpo) != cuerpo[0] + 1:
         return False
+    texto = cuerpo[1:].split(b"\0", 1)[0]
+    if gm.atender(con, texto):
+        return True
+    if cupon.atender(con, texto):
+        return True
+    if circulo.atender(con, texto):
+        return True
     sala = de_la_sala(con)
     if sala is None:
         anotar("   FF8 CHAT en carrera de alguien sin sala: no se reparte")
         return True
-    texto = cuerpo[1:].split(b"\0", 1)[0]
     r = registro161(con, 1, texto)
     for c in list(salas.jugadores(sala)):
         c.mandar_interno(0x1F4, 0, r)

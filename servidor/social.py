@@ -281,12 +281,13 @@ def proponer(con, seq, cuerpo):
         quedan = _quedan(yo)
         anillo = None if (c is None or otro is None or c["usn"] == yo) else _anillo_que_tiene(con, pedido)
         d = parejas()
+        real = pareja_real()
         with _CANDADO:
             if c is None or otro is None:
                 cod = PE_SOLO_CONECTADOS
             elif c["usn"] == yo:
                 cod = PE_A_UNO_MISMO
-            elif d.get(yo, {}).get("usn") == c["usn"]:
+            elif d.get(yo, {}).get("usn") == c["usn"] or (real and (yo in d or c["usn"] in d)):
                 cod = PE_YA_SON_PAREJA
             elif anillo is None:
                 cod = PE_SIN_ANILLO
@@ -327,18 +328,30 @@ def proponer(con, seq, cuerpo):
             anotar("   PAREJA: %s acepta a %s pero el anillo %d ya no esta: no son pareja" % (nick_yo, _nick(x), anillo))
             return True
 
+        real = pareja_real()
+        desde = time.strftime("%Y%m%d%H%M%S") if real else None
+
         def aceptar(dd):
             if dd.get(yo, {}).get("usn") == x and dd.get(x, {}).get("usn") == yo:
                 return None                                   # ya eran pareja (propuestas cruzadas): nada que escribir
+            if real and (yo in dd or x in dd):
+                return "ya_tiene"                             # M11 (PAREJA_REAL=1): ninguno puede tener pareja previa
             dejados = []                                      # (el que quedo solo, el que se fue)
             for a, b2 in ((yo, x), (x, yo)):
                 viejo = dd.pop(a, {}).get("usn")
                 if viejo and viejo != b2:
                     dd.pop(viejo, None)
                     dejados.append((viejo, a))
-                dd[a] = {"usn": b2, "anillo": anillo}
+                reg = {"usn": b2, "anillo": anillo}
+                if real:
+                    reg["desde"] = desde
+                dd[a] = reg
             return dejados
         dejados = _cambiar_parejas(aceptar)                    # las dos cuentas (y las parejas que dejan) en UN candado
+        if dejados == "ya_tiene":
+            _error_propuesta(con, seq, _quedan(yo), PE_YA_SON_PAREJA)
+            anotar("   PAREJA: %s acepta a %s pero alguno ya tiene pareja (PAREJA_REAL=1): nada escrito" % (nick_yo, _nick(x)))
+            return True
         with _CANDADO:                                         # una propuesta cruzada entre los dos ya no tiene sentido
             if _PEND.get(yo, (None,))[0] == x:
                 del _PEND[yo]
@@ -444,13 +457,18 @@ def ficha_datos(con, seq, cuerpo):
 #   pareja" ([UI+0x1568] queda en 0, leido con ReadProcessMemory). Ver docs/tablero/layouts/FF77.md, "Lectura de la ficha 78": el FF77 NO
 #   llega al campo #62 en este exe (HIPOTESIS: el tramo del manejador que vive en la cueva 0x1da649d4 lee 4 B fijos en +9 donde el
 #   oficial parece traer [L][bytes], y el resto del flujo queda desalineado). Se deja armado para cuando se arregle eso.
-LLAVES_OMISION = {"FICHA_PAREJA": "0", "PAREJA_EN_MENSAJERO": "1"}   # ficha 112: el tipo 1 prende el icono 玩伴 del mensajero (MEDIDO con 2 copias); 1 = prendido
+LLAVES_OMISION = {"FICHA_PAREJA": "0", "PAREJA_EN_MENSAJERO": "1", "PAREJA_REAL": "1"}   # ficha 112: tipo 1 prende el icono 玩伴; M11: PAREJA_REAL (sin pareja los dos + fecha `desde` en cuenta y registro97 +0x2f)
 FF77_LARGO = 566          # la plantilla del oficial: #62 es el u8 de +561 y #86 (u32 = 0) cierra los 4 ultimos bytes
 FF77_PAREJA_OFS = 561
 
 
 def llave(nombre="FICHA_PAREJA"):
     return os.environ.get(nombre, LLAVES_OMISION[nombre]) == "1"
+
+
+def pareja_real():
+    """Llave M11 (entorno PAREJA_REAL, leida en el momento, omision '1'): exige que ninguno tenga pareja al proponer/aceptar y guarda `desde`."""
+    return llave("PAREJA_REAL")
 
 
 def _fecha8(desde):
@@ -546,14 +564,28 @@ def pareja(con, seq, cuerpo):
 
 
 def tunel(con, seq, cuerpo):
-    """FF40 CmdSessionForward: por ahora solo el sub 0x21 (GuildInfo). El resto sigue su camino (captura)."""
+    """FF40 CmdSessionForward: circulo (0x21..0x23, llave CIRCULOS), amigos, susurro, megafono, pareja, ficha."""
     if cuerpo == b"\x21":
+        import circulo
+        if circulo.activo():
+            return circulo.enviar_info(con, seq)
         con.mandar_interno(0x40, seq, b"\x21\x00\x00" + b"\xff" * 4 + bytes(6))
         return True
+    if cuerpo[:1] == b"\x22" and len(cuerpo) >= 2:
+        import circulo
+        if circulo.chat_circulo(con, seq, cuerpo):
+            return True
+    if cuerpo[:1] == b"\x23" and len(cuerpo) >= 2:
+        import circulo
+        if circulo.aviso_desde_cliente(con, seq, cuerpo):
+            return True
     if cuerpo[:1] == b"\x09" and len(cuerpo) == 5:
         return borrar_amigo(con, seq, cuerpo)
     if cuerpo[:1] in (b"\x04", b"\x0d"):
         return susurro(con, seq, cuerpo)
+    if cuerpo[:1] == b"\x0b" and len(cuerpo) >= 6:
+        if megafono(con, seq, cuerpo):                                 # M10: con las llaves apagadas devuelve False y sigue como siempre
+            return True
     if cuerpo[:1] == b"\x0a" and len(cuerpo) >= 2:
         return proponer(con, seq, cuerpo)
     if cuerpo[:1] == b"\x01" and len(cuerpo) >= 2:
@@ -644,6 +676,14 @@ def _gbk(t, n):
     return textos.codificar(t, n)
 
 
+def _desde_pareja(usn):
+    """Texto AAAAMMDD (8 B ASCII, LEIDO 0x00871ec1 / 0x02732c60, BODA_LECTURA.md §2) de desde cuando `usn` tiene pareja (玩伴纪念日), con PAREJA_REAL=1."""
+    if not pareja_real():
+        return b""
+    d = str((parejas().get(usn) or {}).get("desde") or "")
+    return d[:8].encode("ascii") if len(d) >= 8 and d[:8].isdigit() else b""
+
+
 def registro97(tipo, usn):
     r = bytearray(97)
     r[0] = tipo
@@ -651,6 +691,10 @@ def registro97(tipo, usn):
     r[9] = 1 if _conectado(usn) else 0
     nick = _gbk(_nick(usn), 12)
     r[0xf:0xf + len(nick)] = nick
+    desde = _desde_pareja(usn)
+    if desde:
+        # M11 (LEIDO 0x00871ec1 / 0x02732c60, BODA_LECTURA.md §2): reg+0x2f = fecha AAAAMMDD -> 玩伴纪念日 (en todo registro de ese usn, como +0x3e)
+        r[0x2f:0x2f + len(desde)] = desde
     aniv = _aniversario_de(usn)
     if aniv:
         # ficha 117 (MEDIDO con el juego): reg+0x3e = fecha de la boda AAAAMMDD -> 结婚纪念日. Va en TODO registro de ese usn (tipo 1, 2 y 0): si la pareja tambien es amiga, la
@@ -972,6 +1016,85 @@ def lista_amigos(con, seq, cuerpo):
     me = _de(_amigos(), (con.cuenta or {}).get("usn"))
     regs = [registro97(2, u) for u in me["amigos"]]
     con.mandar_interno(0x215, seq, struct.pack("<I", len(regs)) + b"".join(regs))
+    return True
+
+
+# ====================================================================================================================
+# MEGAFONO (M10, 22-nov). Lo MEDIDO: el C2S es FF40 sub 0x0B `SendMegaphoneMessage` [0B][u32 item][u8 L][texto] (docs/tablero/layouts/
+# FF40.md, emisor 0x02775fb0: campos [u8][u32][u8][bytes]; NO es el sub 0x19, que en la tabla del emisor es el chat chico). Los
+# megafonos del Steam son los `type` de notice.xml (rnr_script.pak, copia en _fuera_git/m07/steam): itemcode 1 y 2 (noticedtype S,
+# chico y grande) y 200 / 11000146 (noticedtype D, "agregar amigo"; el 11000146 es el 婚礼喇叭 de wdshop). El cliente ya comprueba solo
+# que tenga el objeto (string.csv: "no hay altavoz adecuado, comprelo") y el servidor cobra 1 unidad de ese item: sin item, no se manda.
+# ⛔ SIN MEDIR: la forma del S2C que dibuja el cartel en el cliente moderno. Abajo va la del 2013 (S2C FF40 [12][u32 item][u8 L][quien]
+# [u8 L][texto], lobby_social.py `_s2c_cartel_megafono`): en el exe moderno el lector del FF40 no se pudo atar a un sub 0x12 con
+# seguridad (layouts/FF40.md no rotula los subs del S2C salvo los de pareja/amigos). Por eso hay DOS llaves:
+#   MEGAFONO_TODOS  (omision "1")  prende toda la logica de abajo;
+#   MEGAFONO_CARTEL (omision "0")  autoriza mandar ESE S2C 2013 (HIPOTESIS) a todos; con "0" el megafono se atiende como hoy
+#                                  (nada se cobra ni se manda) hasta que se mida el cartel con dos copias del juego.
+# Sin cuenta local (sesion capturada) tampoco se atiende.
+LLAVES_M10 = {"MEGAFONO_TODOS": "1", "MEGAFONO_CARTEL": "0"}
+MEGAFONOS = (1, 2, 200, 11000146)       # itemcode de notice.xml del Steam (S: 1, 2; D: 200, 11000146). 88/89/104/112: sin medir, no se aceptan
+MEGAFONO_TEXTO_MAX = 120                # MEGAFONO_LARGO_MAX del 2013 (HIPOTESIS para el Steam: el limite del cliente no se midio)
+MEGAFONO_APODO_MAX = 13                 # igual que _apodo: el buffer del cliente lee apodos de menos de 14 B
+
+
+def llave_m10(nombre):
+    """Llave de M10, leida en el momento (por omision LLAVES_M10)."""
+    return os.environ.get(nombre, LLAVES_M10[nombre]) == "1"
+
+
+def cartel_megafono(item, nick_gbk, texto):
+    """S2C FF40 [0D][u32 item][u8 L1][quien (L1 <= 13)][u8 L2][texto][u8 extra=0]. LEIDO en el exe moderno (M10b, 22-nov,
+    un testigo: lectura estatica): sub 0x0D @ 0x027a089f es el cartel del megafono; `extra` 0 -> arg4 0 de 0x00980e40.
+    ⚠ L1 >= 14 hace __report_rangecheckfailure en el cliente (0x027a08d9): el apodo se corta a 13 B aca tambien."""
+    nick_gbk = nick_gbk[:13]
+    texto = texto[:255]
+    return (bytes([0x0D]) + struct.pack("<I", item) + bytes([len(nick_gbk)]) + nick_gbk + bytes([len(texto)]) + texto
+            + bytes([0]))
+
+
+def acuse_megafono(item, ok=True):
+    """S2C FF40 [0C][u8 res][u32 item] al que lo mando (M10b: res 1 = 'mensaje enviado' y el cliente descuenta 1 carga
+    del item en SU mochila, 0x00473e50; res 2 = 'usa un lenguaje respetuoso')."""
+    return bytes([0x0C, 1 if ok else 2]) + struct.pack("<I", item)
+
+
+def megafono(con, seq, cuerpo):
+    """C2S FF40 0x0B: con el item (se cobra 1) el cartel le llega a TODOS los conectados (estado.CONEXIONES, el que lo mando tambien).
+    Sin item, o con un item que no es megafono, no se cobra ni se manda nada. False = no se atiende (llaves apagadas o sin cuenta)."""
+    if not (llave_m10("MEGAFONO_TODOS") and llave_m10("MEGAFONO_CARTEL")):
+        return False
+    yo = (con.cuenta or {}).get("usn")
+    if yo is None:
+        return False
+    nick = (con.cuenta or {}).get("nick") or _nick(yo)
+    item = struct.unpack_from("<I", cuerpo, 1)[0]
+    L = cuerpo[5]
+    texto = cuerpo[6:6 + L]
+    if len(texto) < L or not texto.strip(b"\x00 "):
+        anotar("   MEGAFONO: %s mando un texto cortado o vacio (%d B): no se cobra ni se manda" % (nick, len(texto)))
+        return True
+    if item not in MEGAFONOS:
+        anotar("   MEGAFONO: %s pidio el item %d, que no es un megafono medido: no se cobra ni se manda" % (nick, item))
+        return True
+    import tienda
+    quedan = tienda.gastar_objeto(yo, item)                         # gastar y comprobar en UN solo candado: el resultado es el permiso
+    if quedan is None:
+        anotar("   MEGAFONO: %s no tiene el item %d: no se manda" % (nick, item))
+        return True
+    paquete = cartel_megafono(item, _gbk(nick, MEGAFONO_APODO_MAX), texto[:MEGAFONO_TEXTO_MAX])
+    n = 0
+    for c in list(estado.CONEXIONES.values()):
+        try:
+            c.mandar_interno(0x40, 0, paquete)
+            n += 1
+        except Exception as e:                                       # noqa: BLE001
+            anotar("   ⛔ megafono: una conexion no recibio el cartel: %r" % e)
+    try:
+        con.mandar_interno(0x40, seq, acuse_megafono(item))
+    except Exception as e:                                           # noqa: BLE001
+        anotar("   ⛔ megafono: sin acuse al que lo mando: %r" % e)
+    anotar("   MEGAFONO de %s (item %d, le quedan %d) -> %d conexion(es)" % (nick, item, quedan, n))
     return True
 
 

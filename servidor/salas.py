@@ -23,6 +23,7 @@ import struct
 import time
 
 import captura
+import cuenta
 import estado
 import fichas
 import textos
@@ -35,6 +36,32 @@ IV_AES = base64.b64decode("QtHzrOYWadpeVhDjUMNXow==")
 
 def anotar(txt):
     estado.anotar(txt)
+
+
+def llave(nombre):
+    return os.environ.get(nombre, "1").strip().lower() not in ("0", "no", "false", "")
+
+
+def _a_bytes(v):
+    if not v:
+        return b""
+    return v.encode("latin1") if isinstance(v, str) else bytes(v)
+
+
+def _clave_de_ff0f(cuerpo):
+    """Saca la clave (bytes) de un C2S FF0F SendJoinRoom, o b"" si viene sin clave (<= 6 B).
+    En el cliente moderno (0x02765cc0 / 0x008c1f20 / 0x009f8d7a y lobby_salas._clave_del_ff11 camino A):
+    [u16 A][u8 flag][u8 len][clave...][u8][u8] (@3 = largo). Acepta tambien @6 o @7 (2013) o cola cruda."""
+    if len(cuerpo) <= 6:
+        return b""
+    for pos in (3, 6, 7, 2):
+        if pos < len(cuerpo):
+            n = cuerpo[pos]
+            if 1 <= n <= 32 and pos + 1 + n <= len(cuerpo):
+                tramo = cuerpo[pos + 1:pos + 1 + n]
+                if all(0x20 <= b < 0x7F for b in tramo):
+                    return bytes(tramo)
+    return cuerpo[6:].split(b"\x00", 1)[0]
 
 
 def jugadores(sala):
@@ -217,6 +244,9 @@ def _asiento_anfitrion(sala):
 def ff15_para(cuerpo, sala):
     """FF15 RoomInfo grabado: el titulo va en el byte 15 (u8 largo + GBK) y el modo, como `[u16 modo] 0400`, mas
     adelante (el mismo par que el FF10)."""
+    if cuerpo is None and os.environ.get("FF15_NEUTRO", "1").lower() in ("1", "si"):
+        anotar("   FF15 sin plantilla: armado por campos (neutro.ff15_sala)")
+        return neutro.ff15_sala(sala)
     n = cuerpo[15]
     resto = cuerpo[16 + n:]
     i = resto.find(b"\x12\x00\x04\x00")
@@ -502,10 +532,18 @@ def avisar_equipos(sala, solo=None):
               "todos" if solo is None else (solo.cuenta or {}).get("nick")))
 
 
-def sentar_y_avisar(con, sala, seq):
+def sentar_y_avisar(con, sala, seq=0, clave=b""):
     """Lo comun de unirse (clic en la sala o entrada rapida). Orden medido en la grabacion 213306 (nota 06 §6):
     FF12D, FF0C, FF232, FF0F [asiento][tipo 0][0]x6, FF167, FF246 room.joinRoom, FF15 la sala, FF0C, FF17 por asiento.
     A los que ya estaban: el FF0C nuevo."""
+    if isinstance(seq, (bytes, str)):
+        clave, seq = seq, 0
+    if llave("SALA_CLAVE"):
+        clave_sala = _a_bytes(getattr(sala, "clave", b""))
+        if clave_sala and _a_bytes(clave) != clave_sala:
+            con.mandar_interno(0x0F, seq, bytes([0x0E, 0, 0, 0]) + bytes(4))     # 0x0E: clave incorrecta (0x02789f29 -> 0x1ba)
+            anotar("   S2C FF0F 0x0E: clave incorrecta para la sala %d" % sala.numero)
+            return True
     sacar_de_su_sala(con)
     asiento = sentar(sala, con)
     if asiento is None:
@@ -547,14 +585,24 @@ def sentar_y_avisar(con, sala, seq):
     return True
 
 
+def unirse_sala(con, sala, seq=0, clave=b""):
+    """Mete a `con` en `sala` comprobando `sala.clave` (si SALA_CLAVE=1). Devuelve True si entro, False si fue rechazado."""
+    if isinstance(seq, (bytes, str)):
+        clave, seq = seq, 0
+    sentar_y_avisar(con, sala, seq, clave=clave)
+    return con in sala.asientos.values()
+
+
 def rapida(con, seq, cuerpo):
     """C2S FF1F7 SendQuickJoin3 (6 B: [u8][u32 mascara de modos][u8]). Sin sala que sirva: FF72 `0d` (lo que mando el
     oficial en la grabacion 215530 sin salas)."""
     if len(cuerpo) != 6:
         return False
     mascara = struct.unpack_from("<I", cuerpo, 1)[0]
+    con_clave = llave("SALA_CLAVE")
     sala = next((s for s in estado.SALAS.values() if (s.modo & mascara or not mascara) and len(s.asientos) < s.max
-                 and s.estado & 0x02 == 0 and con not in jugadores(s)), None)
+                 and s.estado & 0x02 == 0 and not (con_clave and _a_bytes(getattr(s, "clave", b"")))
+                 and con not in jugadores(s)), None)
     if sala is None:
         con.mandar_interno(0x72, seq, b"\x0d")
         anotar("   S2C FF72 0d: entrada rapida sin sala libre")
@@ -573,7 +621,7 @@ def unirse(con, seq, cuerpo):
         con.mandar_interno(0x0F, seq, bytes([0x1A, 0, 0, 0]) + bytes(4))     # 0x1A: no se puede entrar
         anotar("   S2C FF0F 0x1A: la sala %d no existe (pedido %s)" % (numero, cuerpo.hex()))
         return True
-    return sentar_y_avisar(con, sala, seq)
+    return sentar_y_avisar(con, sala, seq, clave=_clave_de_ff0f(cuerpo))
 
 
 def info_por_numero(con, seq, cuerpo):
@@ -726,6 +774,34 @@ def _de_anfitrion(con, nombre):
     return sala
 
 
+def pasar_anfitrion(con, seq, cuerpo):
+    """M05. C2S FF9B SendChangeCreator [u8 asiento] (0x027d4090) -> S2C FF9B CmdChangeCreator [u8 asiento][0][0] (0x027d44c0)
+    y FF15 con byte 2 = asiento del nuevo anfitrion a todos los de la sala."""
+    if not llave("SALA_ANFITRION"):
+        return False
+    if len(cuerpo) != 1:
+        return False
+    sala = _de_anfitrion(con, "FF9B")
+    if sala is None:
+        return True
+    asiento = cuerpo[0] & 0x7F
+    nuevo = sala.asientos.get(asiento)
+    if sala.carrera is not None or nuevo is None or nuevo is con:
+        return True
+    sala.anfitrion = nuevo
+    quitar_listo = bool(nuevo.listo)
+    nuevo.listo = 0
+    aviso = bytes([asiento, 0, 0])
+    for c in jugadores(sala):
+        if quitar_listo:
+            c.mandar_interno(0x17, 0, bytes([0, asiento, 0]))
+        c.mandar_interno(0x9B, seq if c is con else 0, aviso)
+    _mandar_ff15_a_todos(sala)
+    anotar("   FF9B pasar anfitrion a asiento %d en sala %d -> FF9B y FF15 a %d"
+           % (asiento, sala.numero, len(sala.asientos)))
+    return True
+
+
 def _mandar_ff15_a_todos(sala):
     """El FF15 nuevo a toda la sala (el oficial lo manda tras un FF1B y un FF132; a los DEMAS, HIPOTESIS: la grabacion
     es del anfitrion). En carrera no: llega con la vuelta a la sala (como el aviso del nuevo anfitrion)."""
@@ -801,15 +877,144 @@ def selector(con, seq, cuerpo):
     return True
 
 
+FAVORITAS_TOPE = 2000     # tope del 2013 (picker.PREFERIDAS_TOPE): mas que el catalogo, solo corta basura
+
+
+def _leer_lista_canciones(cuerpo):
+    """[u16 n][u16 cancion] x n -> lista de ids, o None si el largo no cierra (picker.leer_lista del 2013)."""
+    if len(cuerpo) < 2:
+        return None
+    n = struct.unpack_from("<H", cuerpo, 0)[0]
+    if n > FAVORITAS_TOPE or len(cuerpo) != 2 + 2 * n:
+        return None
+    return [struct.unpack_from("<H", cuerpo, 2 + 2 * i)[0] for i in range(n)]
+
+
+def canciones_favoritas(con, seq, cuerpo):
+    """M08. C2S FF137 SendGetFavoriteSongs (0 B, grabado 4/4) -> S2C FF137 CmdGetFavoriteSongs [u16 n][u16 cancion] x n
+    (lect=['2','2'] en tabla_ff_cruce.json, igual a 2019 y 2013). Con FAVORITAS=0 o sin cuenta local devuelve False para
+    que conteste cuenta_local.favoritas (00 00, igual que antes)."""
+    if not llave("FAVORITAS") or cuerpo:
+        return False
+    usn = (con.cuenta or {}).get("usn")
+    if not usn:
+        return False
+    try:
+        favs = [int(c) & 0xFFFF for c in (cuenta.leer_seccion(usn, "musica").get("favoritas") or [])
+                if 0 < int(c) <= 0xFFFF][:FAVORITAS_TOPE]
+    except cuenta.CuentaError as e:
+        anotar("   ⛔ FF137 favoritas usn %s: %s" % (usn, e))
+        favs = []
+    con.mandar_interno(0x137, seq, struct.pack("<H", len(favs)) + b"".join(struct.pack("<H", c) for c in favs))
+    anotar("   S2C FF137 favoritas de %s (usn %s): %d" % ((con.cuenta or {}).get("nick"), usn, len(favs)))
+    return True
+
+
+def _cambiar_favoritas(con, cuerpo, agregar):
+    """M08. C2S FF138 (agregar) / FF13A (quitar): [u16 n][u16 cancion] x n (forma del 2013 picker.py; sin respuesta S2C,
+    rx=False en tabla_ff_cruce.json). Con FAVORITAS=0 o sin cuenta local devuelve False."""
+    if not llave("FAVORITAS"):
+        return False
+    usn = (con.cuenta or {}).get("usn")
+    if not usn:
+        return False
+    lista = _leer_lista_canciones(cuerpo)
+    if lista is None:
+        return False
+
+    def cambiar(sec):
+        favs = [int(c) for c in (sec.get("favoritas") or []) if 0 < int(c) <= 0xFFFF][:FAVORITAS_TOPE]
+        if agregar:
+            for c in lista:
+                if 0 < c <= 0xFFFF and c not in favs and len(favs) < FAVORITAS_TOPE:
+                    favs.append(c)
+        else:
+            quitar = set(lista)
+            favs = [c for c in favs if c not in quitar]
+        if favs:
+            sec["favoritas"] = favs
+        else:
+            sec.pop("favoritas", None)
+        return list(favs)
+
+    try:
+        quedan = cuenta.cambiar_seccion(usn, "musica", cambiar)
+    except cuenta.CuentaError as e:
+        anotar("   ⛔ FF%X favoritas usn %s: %s" % (0x138 if agregar else 0x13A, usn, e))
+        return True
+    anotar("   C2S FF%X favoritas de %s (usn %s): %s%s -> quedan %d"
+           % (0x138 if agregar else 0x13A, (con.cuenta or {}).get("nick"), usn, "+" if agregar else "-", lista, len(quedan)))
+    return True
+
+
+def agregar_favoritas(con, seq, cuerpo):
+    """M08. C2S FF138 SendAddFavoriteSongs (solo TX, sin S2C): agrega canciones a cuenta['musica']['favoritas']."""
+    return _cambiar_favoritas(con, cuerpo, True)
+
+
+def quitar_favoritas(con, seq, cuerpo):
+    """M08. C2S FF13A SendDelFavoriteSongs (solo TX, sin S2C): quita canciones de cuenta['musica']['favoritas']."""
+    return _cambiar_favoritas(con, cuerpo, False)
+
+
+def anotar_records_carrera(sala, cancion, filas, puesto):
+    """M08. Al armar el cartel FF28 (carrera.mandar_cartel): guarda por cuenta y cancion el mejor combo, la mejor
+    precision (pd) y las veces terminadas en cuenta['musica']['records']. Solo carreras terminadas (puesto != 7,
+    frame != 0xFFFFFFFF y no fallo en cero). Con RECORDS=0 no escribe nada."""
+    if not llave("RECORDS") or not cancion or not (0 < int(cancion) <= 0xFFFF):
+        return
+    clave = str(int(cancion))
+    for fr, a, c2s in filas:
+        if puesto.get(a, 7) == 7 or fr == 0xFFFFFFFF or len(c2s) < 8:
+            continue
+        con = sala.asientos.get(a)
+        usn = (con.cuenta or {}).get("usn") if con is not None else None
+        if not usn:
+            continue
+        combo = struct.unpack_from("<H", c2s, 4)[0]
+        pd = min(100, c2s[6])
+        star = min(100, c2s[7])
+        if combo == 0 and pd == 0 and star == 0:
+            continue
+
+        def actualizar(sec, combo=combo, pd=pd, star=star):
+            recs = sec.setdefault("records", {})
+            r = dict(recs.get(clave) or {})
+            r["combo"] = max(int(r.get("combo") or 0), combo)
+            r["pd"] = max(int(r.get("pd") or 0), pd)
+            r["star"] = max(int(r.get("star") or 0), star)
+            r["veces"] = min(999999, int(r.get("veces") or 0) + 1)
+            recs[clave] = r
+            return dict(r)
+
+        try:
+            nuevo = cuenta.cambiar_seccion(usn, "musica", actualizar)
+            anotar("   RECORD cancion %s de %s (usn %s): combo %d, pd %d%%, veces %d"
+                   % (clave, (con.cuenta or {}).get("nick"), usn, nuevo["combo"], nuevo["pd"], nuevo["veces"]))
+        except cuenta.CuentaError as e:
+            anotar("   ⛔ RECORD cancion %s usn %s: %s" % (clave, usn, e))
+
+
 def records_cancion(con, seq, cuerpo):
     """C2S FF139 `[u16 cancion]` (el anfitrion se para sobre una cancion del selector) -> S2C FF139 de 19 B:
-    `[u16 cancion][u8 marca][u16 a][u16 b][u32 c][u32 d][u32 e]` (layouts/FF139.md; 0xa111a0 pone a, b y min(c, 999999) en
-    pantalla). MEDIDO: las canciones nunca jugadas (10 de 13) vienen con todo en 0 menos d = 999. Nosotros no guardamos
-    records: SIEMPRE mandamos ese «sin record». HIPOTESIS: a, b, c son records personales (las jugadas traen 157/94/2, etc.)."""
+    `[u16 cancion][u8 marca][u16 combo][u16 pd][u32 veces][u32 puesto][u32 cambio]` (layouts/FF139.md; 0xa111a0 pone
+    combo, pd y min(veces, 999999) en pantalla). MEDIDO: sin record va todo en 0 menos puesto = 999 (10 de 13 del
+    oficial). M08: con RECORDS=1 y cuenta local devuelve el record guardado en cuenta['musica']['records']; marca queda
+    en 0 (sin medir en moderno) y puesto/cambio en 999/0 (sin ranking de popularidad). Con RECORDS=0 vuelve a sin record."""
     if len(cuerpo) != 2:
         return False
     cancion = struct.unpack_from("<H", cuerpo)[0]
-    con.mandar_interno(0x139, seq, struct.pack("<HBHHIII", cancion, 0, 0, 0, 0, 999, 0))
+    combo = pd = veces = 0
+    usn = (con.cuenta or {}).get("usn")
+    if llave("RECORDS") and usn and cancion:
+        try:
+            r = (cuenta.leer_seccion(usn, "musica").get("records") or {}).get(str(cancion)) or {}
+            combo = min(0xFFFF, max(0, int(r.get("combo") or 0)))
+            pd = min(100, max(0, int(r.get("pd") or 0)))
+            veces = min(999999, max(0, int(r.get("veces") or 0)))
+        except cuenta.CuentaError as e:
+            anotar("   ⛔ FF139 record cancion %d usn %s: %s" % (cancion, usn, e))
+    con.mandar_interno(0x139, seq, struct.pack("<HBHHIII", cancion, 0, combo, pd, veces, 999, 0))
     return True
 
 
@@ -924,10 +1129,14 @@ def cambiar_modo(con, seq, cuerpo):
 MANEJADORES = {
     0x20: expulsar,
     0x18: cambiar_equipo,
+    0x9B: pasar_anfitrion,
     0x1F6: lista,
     0x1B: elegir_pista,
     0x79: selector,
+    0x137: canciones_favoritas,
+    0x138: agregar_favoritas,
     0x139: records_cancion,
+    0x13A: quitar_favoritas,
     0x1C: elegir_cancion,
     0x132: grupo_coop,
     0x1F5: crear,

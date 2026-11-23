@@ -24,7 +24,10 @@ import copy
 import hashlib
 import json
 import os
+import re
 import shutil
+import sqlite3
+import sys
 import time
 
 import ajustes
@@ -39,12 +42,27 @@ VERSION = 2
 USN_BASE = 2000001           # el mismo que cuentas.USN_BASE
 VIEJOS = ("cuentas.json", "tienda.json", "amigos.json", "parejas.json", "pruebas.json")
 ESPERA_CANDADO = 30.0        # segundos que se espera el candado antes de rendirse
+ESPERA_SQLITE_MS = 5000      # busy_timeout de SQLite en milisegundos
 SECCIONES_VACIAS = ("tienda", "amigos", "pareja", "correo", "progresion", "granja", "jardin", "casa", "gemas", "boda")
 # secciones que se mudan desde un archivo viejo la primera vez que se usa cuenta.json: {seccion: archivo viejo}
 MUDANZAS = {"tienda": "tienda.json", "amigos": "amigos.json", "pareja": "parejas.json"}
 # parejas.json que no existe: se arma con estas dos parejas de prueba (lo que hacia social.parejas() la primera vez)
 SEMILLA_PAREJAS = {2000003: 2000004, 2000001: 2000006}
 ANILLO_SEMILLA = 36005
+_IDENT_SQL = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_CLAVES_TABLA = ("cuentas", "usuarios", "sesiones")
+
+
+def _leer_bandera_sqlite():
+    return (os.environ.get("CUENTA_SQLITE") or "0").strip().lower() in ("1", "si")
+
+
+# Llave CUENTA_SQLITE: leida al importar y tambien en el momento (por omision "0" = cuenta.json).
+CUENTA_SQLITE = _leer_bandera_sqlite()
+
+
+def _usar_sqlite():
+    return _leer_bandera_sqlite()
 
 
 class CuentaError(RuntimeError):
@@ -56,9 +74,17 @@ def datos():
     return ajustes.carpeta_cuenta()
 
 
-def ruta():
-    """El archivo de cuentas."""
+def _ruta_json():
     return os.path.join(datos(), "cuenta.json")
+
+
+def _ruta_db():
+    return os.path.join(datos(), "cuentas.db")
+
+
+def ruta():
+    """El archivo de cuentas (cuentas.db con CUENTA_SQLITE=1; cuenta.json por omision)."""
+    return _ruta_db() if _usar_sqlite() else _ruta_json()
 
 
 class _Candado:
@@ -259,17 +285,18 @@ def _asegurar():
     """Deja cuenta.json listo y devuelve su contenido: si no existe (primera vez) respaldo con md5 y lo arma desde
     cuentas.json; si le faltan secciones por mudar (MUDANZAS), respaldo NUEVO con md5 y las muda. Todo con el candado, lee
     antes de escribir y escribe una sola vez: si algo falla (archivo viejo roto) no se escribe nada."""
-    if not os.path.exists(ruta()):
+    r = _ruta_json()
+    if not os.path.exists(r):
         with _Candado():
-            if not os.path.exists(ruta()):
+            if not os.path.exists(r):
                 viejo = os.path.join(datos(), "cuentas.json")
                 viejas = _leer_json(viejo)["cuentas"] if os.path.exists(viejo) else []
                 _respaldar()
-                _escribir(ruta(), _mudar(viejas))
-    d = _leer_json(ruta())
+                _escribir(r, _mudar(viejas))
+    d = _leer_json(r)
     if _pendientes(d):
         with _Candado():
-            d = _forma(_leer_json(ruta()))      # con el candado otra vez: otro proceso pudo mudar mientras tanto
+            d = _forma(_leer_json(r))      # con el candado otra vez: otro proceso pudo mudar mientras tanto
             pend = _pendientes(d)
             if pend:
                 viejos = {s: _viejo_de(s) for s in pend}      # se lee todo antes de respaldar y de tocar nada
@@ -278,34 +305,646 @@ def _asegurar():
                     movidas, huerfanas = _mudar_seccion(d, s, viejos[s])
                     d.setdefault("mudadas", {})[s] = {"fecha": time.strftime("%Y-%m-%d %H:%M:%S"),
                                                       "movidas": movidas, "huerfanas": huerfanas}
-                _escribir(ruta(), d)
+                _escribir(r, d)
     if "usuarios" not in d or d.get("version", 1) < VERSION:
         with _Candado():
-            d = _forma(_leer_json(ruta()))
+            d = _forma(_leer_json(r))
             if "usuarios" not in d or d.get("version", 1) < VERSION:
                 _respaldar()
                 _migrar_usuarios(d)
-                _escribir(ruta(), d)
+                _escribir(r, d)
     return d
 
 
 def _cargar(asegurar=True):
     """Lee cuenta.json (lo muda si falta o si le faltan secciones). Error claro si esta roto o no tiene la forma esperada."""
-    return _forma(_asegurar() if asegurar else _leer_json(ruta()))
+    return _forma(_asegurar() if asegurar else _leer_json(_ruta_json()))
 
+
+# ---------- Almacenamiento SQLite (CUENTA_SQLITE=1) ----------
+
+def _anotar(txt):
+    mod = sys.modules.get("estado")
+    if mod is not None and hasattr(mod, "anotar"):
+        try:
+            mod.anotar(txt)
+            return
+        except Exception:
+            pass
+    print(txt, flush=True)
+
+
+def _dumps(obj):
+    return json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
+
+
+def _loads(texto, origen="cuentas.db"):
+    try:
+        return json.loads(texto)
+    except ValueError as e:
+        raise CuentaError("%s tiene JSON roto (%s)" % (origen, e))
+
+
+def _borrar_archivos_db(base):
+    for suf in ("", "-wal", "-shm"):
+        p = base + suf
+        try:
+            if os.path.exists(p):
+                os.unlink(p)
+        except OSError:
+            pass
+
+
+def _abrir_db(r=None, init_wal=False):
+    db_path = r or _ruta_db()
+    try:
+        con = sqlite3.connect(db_path, timeout=ESPERA_SQLITE_MS / 1000.0, isolation_level=None)
+        con.execute("PRAGMA busy_timeout=%d" % ESPERA_SQLITE_MS)
+        if init_wal:
+            con.execute("PRAGMA journal_mode=WAL")
+        con.execute("PRAGMA synchronous=NORMAL")
+        return con
+    except sqlite3.Error as e:
+        raise CuentaError("no se pudo abrir %s: %s" % (db_path, e))
+
+
+def _crear_esquema(con):
+    con.execute("CREATE TABLE IF NOT EXISTS cuentas (usn TEXT PRIMARY KEY, datos TEXT NOT NULL)")
+    con.execute("CREATE TABLE IF NOT EXISTS usuarios (steamid TEXT PRIMARY KEY, datos TEXT NOT NULL)")
+    con.execute("CREATE TABLE IF NOT EXISTS sesiones (gsn TEXT PRIMARY KEY, datos TEXT NOT NULL, expira REAL NOT NULL)")
+    con.execute("CREATE TABLE IF NOT EXISTS arriba (clave TEXT PRIMARY KEY, datos TEXT NOT NULL)")
+
+
+def _poblar_db(con, d):
+    n_cta = n_usr = n_ses = n_arr = 0
+    for k, acc in (d.get("cuentas") or {}).items():
+        con.execute("INSERT INTO cuentas(usn, datos) VALUES (?, ?)", (str(k), _dumps(acc)))
+        n_cta += 1
+    for k, u in (d.get("usuarios") or {}).items():
+        con.execute("INSERT INTO usuarios(steamid, datos) VALUES (?, ?)", (str(k), _dumps(u)))
+        n_usr += 1
+    sesiones = d.get("sesiones")
+    if isinstance(sesiones, dict):
+        for k, s in sesiones.items():
+            if isinstance(s, dict):
+                exp = float(s.get("expira", 0) or 0)
+                con.execute("INSERT INTO sesiones(gsn, datos, expira) VALUES (?, ?, ?)", (str(k), _dumps(s), exp))
+                n_ses += 1
+    for k, v in d.items():
+        if k in _CLAVES_TABLA:
+            continue
+        con.execute("INSERT INTO arriba(clave, datos) VALUES (?, ?)", (str(k), _dumps(v)))
+        n_arr += 1
+    return n_cta, n_usr, n_ses, n_arr
+
+
+def _preparar_dict_inicial_sqlite():
+    """Prepara en memoria el dict inicial para crear cuentas.db (sin tocar ni borrar cuenta.json).
+    Devuelve (d, desde_json)."""
+    rj = _ruta_json()
+    if os.path.exists(rj):
+        d = _forma(_leer_json(rj))
+        pend = _pendientes(d)
+        if pend:
+            viejos = {s: _viejo_de(s) for s in pend}
+            for s in pend:
+                movidas, huerf = _mudar_seccion(d, s, viejos[s])
+                d.setdefault("mudadas", {})[s] = {
+                    "fecha": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "movidas": movidas,
+                    "huerfanas": huerf,
+                }
+        if "usuarios" not in d or d.get("version", 1) < VERSION:
+            _migrar_usuarios(d)
+        return d, True
+
+    viejo = os.path.join(datos(), "cuentas.json")
+    viejas = _leer_json(viejo)["cuentas"] if os.path.exists(viejo) else []
+    d = _mudar(viejas)
+    pend = _pendientes(d)
+    if pend:
+        viejos = {s: _viejo_de(s) for s in pend}
+        for s in pend:
+            movidas, huerf = _mudar_seccion(d, s, viejos[s])
+            d.setdefault("mudadas", {})[s] = {
+                "fecha": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "movidas": movidas,
+                "huerfanas": huerf,
+            }
+    return d, False
+
+
+def _asegurar_db():
+    """Deja cuentas.db listo. Si no existe y existe cuenta.json, lo migra UNA vez en una transaccion sin tocar el json."""
+    db_path = _ruta_db()
+    if os.path.exists(db_path):
+        return db_path
+    with _Candado():
+        if os.path.exists(db_path):
+            return db_path
+        d, desde_json = _preparar_dict_inicial_sqlite()
+        tmp_db = "%s.tmp%d" % (db_path, os.getpid())
+        _borrar_archivos_db(tmp_db)
+        con = None
+        try:
+            con = _abrir_db(tmp_db, init_wal=True)
+            _crear_esquema(con)
+            con.execute("BEGIN IMMEDIATE")
+            n_cta, n_usr, n_ses, n_arr = _poblar_db(con, d)
+            con.execute("COMMIT")
+            con.close()
+            con = None
+            for _ in range(400):
+                try:
+                    os.replace(tmp_db, db_path)
+                    break
+                except PermissionError:
+                    time.sleep(0.005)
+            else:
+                os.replace(tmp_db, db_path)
+            if desde_json:
+                _anotar(
+                    "cuenta.py: migrado cuenta.json -> cuentas.db "
+                    "(%d cuentas, %d usuarios, %d sesiones, %d arriba)"
+                    % (n_cta, n_usr, n_ses, n_arr)
+                )
+        except Exception as e:
+            if con is not None:
+                try:
+                    con.execute("ROLLBACK")
+                except sqlite3.Error:
+                    pass
+                try:
+                    con.close()
+                except sqlite3.Error:
+                    pass
+            _borrar_archivos_db(tmp_db)
+            if isinstance(e, sqlite3.Error):
+                raise CuentaError("no se pudo crear %s: %s" % (db_path, e))
+            raise
+    return db_path
+
+
+def preparar(anotar=None):
+    """22-nov (cerebro): al ARRANCAR login.py / juego.py. Con CUENTA_SQLITE=1 deja cuentas.db listo (y migra cuenta.json la
+    1.a vez) antes de atender a nadie: el error se ve en el arranque y la migracion no le toca a un jugador en pleno login.
+    Sin la llave no hace nada. Devuelve la ruta del almacen en uso."""
+    if not _usar_sqlite():
+        return ruta()
+    r = _asegurar_db()
+    n = _ejecutar_lectura_db(lambda con: con.execute("SELECT COUNT(*) FROM cuentas").fetchone()[0])
+    (anotar or _anotar)("cuenta.py: almacen SQLite listo (%s, %d cuentas)" % (r, n))
+    return r
+
+
+def _ejecutar_escritura_db(fn):
+    """Abre cuentas.db, inicia BEGIN IMMEDIATE, llama fn(con) -> (escribio, res), hace COMMIT o ROLLBACK y cierra."""
+    db_path = _asegurar_db()
+    con = _abrir_db(db_path)
+    en_tx = False
+    try:
+        try:
+            con.execute("BEGIN IMMEDIATE")
+            en_tx = True
+        except sqlite3.Error as e:
+            raise CuentaError("no se pudo iniciar transaccion en %s: %s" % (db_path, e))
+        escribio, res = fn(con)
+        try:
+            con.execute("COMMIT" if escribio else "ROLLBACK")
+            en_tx = False
+        except sqlite3.Error as e:
+            raise CuentaError("no se pudo confirmar transaccion en %s: %s" % (db_path, e))
+        return res
+    except BaseException as e:
+        if en_tx:
+            try:
+                con.execute("ROLLBACK")
+            except sqlite3.Error:
+                pass
+        if isinstance(e, sqlite3.Error):
+            raise CuentaError("error SQLite en %s: %s" % (db_path, e))
+        raise
+    finally:
+        try:
+            con.close()
+        except sqlite3.Error:
+            pass
+
+
+def _ejecutar_lectura_db(fn):
+    """Abre cuentas.db, llama fn(con) y cierra."""
+    db_path = _asegurar_db()
+    con = _abrir_db(db_path)
+    try:
+        return fn(con)
+    except sqlite3.Error as e:
+        raise CuentaError("error SQLite al leer %s: %s" % (db_path, e))
+    finally:
+        try:
+            con.close()
+        except sqlite3.Error:
+            pass
+
+
+def _sql_todas():
+    def q(con):
+        rows = con.execute("SELECT usn, datos FROM cuentas ORDER BY rowid").fetchall()
+        return {k: _loads(v) for k, v in rows}
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_leer(usn):
+    clave = str(usn)
+    def q(con):
+        row = con.execute("SELECT datos FROM cuentas WHERE usn = ?", (clave,)).fetchone()
+        return _loads(row[0]) if row is not None else None
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_buscar(seccion, campo, valor):
+    usa_extract = (
+        isinstance(seccion, str)
+        and isinstance(campo, str)
+        and _IDENT_SQL.match(seccion)
+        and _IDENT_SQL.match(campo)
+        and isinstance(valor, (int, float, str))
+        and not isinstance(valor, bool)
+    )
+    def q(con):
+        if usa_extract:
+            ruta_j = "$.%s.%s" % (seccion, campo)
+            try:
+                rows = con.execute(
+                    "SELECT usn, datos FROM cuentas WHERE json_extract(datos, ?) = ? ORDER BY rowid",
+                    (ruta_j, valor),
+                ).fetchall()
+            except sqlite3.OperationalError:
+                rows = con.execute("SELECT usn, datos FROM cuentas ORDER BY rowid").fetchall()
+        else:
+            rows = con.execute("SELECT usn, datos FROM cuentas ORDER BY rowid").fetchall()
+        for k, raw in rows:
+            acc = _loads(raw)
+            if (acc.get(seccion) or {}).get(campo) == valor:
+                return k, acc
+        return None, None
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_cambiar_todas(funcion):
+    def tx(con):
+        d = {}
+        arriba_antes = {}
+        for k, raw in con.execute("SELECT clave, datos FROM arriba ORDER BY rowid").fetchall():
+            arriba_antes[k] = raw
+            d[k] = _loads(raw)
+        if "version" not in d:
+            d["version"] = VERSION
+
+        usuarios_antes = {}
+        usuarios_d = {}
+        for k, raw in con.execute("SELECT steamid, datos FROM usuarios ORDER BY rowid").fetchall():
+            usuarios_antes[k] = raw
+            usuarios_d[k] = _loads(raw)
+        d["usuarios"] = usuarios_d
+
+        cuentas_antes = {}
+        cuentas_d = {}
+        for k, raw in con.execute("SELECT usn, datos FROM cuentas ORDER BY rowid").fetchall():
+            cuentas_antes[k] = raw
+            cuentas_d[k] = _loads(raw)
+        d["cuentas"] = cuentas_d
+
+        sesiones_antes = {}
+        ses_rows = con.execute("SELECT gsn, datos FROM sesiones ORDER BY rowid").fetchall()
+        if ses_rows:
+            ses_d = {}
+            for k, raw in ses_rows:
+                sesiones_antes[k] = raw
+                ses_d[k] = _loads(raw)
+            d["sesiones"] = ses_d
+
+        res = funcion(d)
+        _forma(d)
+
+        escribio = False
+
+        # Cuentas: solo filas agregadas, cambiadas o borradas
+        ctas_despues = {str(k): v for k, v in d["cuentas"].items()}
+        for k, v in ctas_despues.items():
+            s = _dumps(v)
+            if cuentas_antes.get(k) != s:
+                con.execute(
+                    "INSERT INTO cuentas(usn, datos) VALUES (?, ?) "
+                    "ON CONFLICT(usn) DO UPDATE SET datos = excluded.datos",
+                    (k, s),
+                )
+                escribio = True
+        for k in cuentas_antes:
+            if k not in ctas_despues:
+                con.execute("DELETE FROM cuentas WHERE usn = ?", (k,))
+                escribio = True
+
+        # Usuarios: solo filas agregadas, cambiadas o borradas
+        usrs_obj = d.get("usuarios")
+        usrs_despues = {str(k): v for k, v in usrs_obj.items()} if isinstance(usrs_obj, dict) else {}
+        for k, v in usrs_despues.items():
+            s = _dumps(v)
+            if usuarios_antes.get(k) != s:
+                con.execute(
+                    "INSERT INTO usuarios(steamid, datos) VALUES (?, ?) "
+                    "ON CONFLICT(steamid) DO UPDATE SET datos = excluded.datos",
+                    (k, s),
+                )
+                escribio = True
+        for k in usuarios_antes:
+            if k not in usrs_despues:
+                con.execute("DELETE FROM usuarios WHERE steamid = ?", (k,))
+                escribio = True
+
+        # Sesiones: solo filas agregadas, cambiadas o borradas
+        ses_obj = d.get("sesiones")
+        ses_despues = {str(k): v for k, v in ses_obj.items()} if isinstance(ses_obj, dict) else {}
+        for k, v in ses_despues.items():
+            s = _dumps(v)
+            if sesiones_antes.get(k) != s:
+                exp = float(v.get("expira", 0) or 0) if isinstance(v, dict) else 0.0
+                con.execute(
+                    "INSERT INTO sesiones(gsn, datos, expira) VALUES (?, ?, ?) "
+                    "ON CONFLICT(gsn) DO UPDATE SET datos = excluded.datos, expira = excluded.expira",
+                    (k, s, exp),
+                )
+                escribio = True
+        for k in sesiones_antes:
+            if k not in ses_despues:
+                con.execute("DELETE FROM sesiones WHERE gsn = ?", (k,))
+                escribio = True
+
+        # Claves de arriba (version, mudadas, huerfanas y cualquier otra)
+        arriba_despues = {str(k): v for k, v in d.items() if k not in _CLAVES_TABLA}
+        for k, v in arriba_despues.items():
+            s = _dumps(v)
+            if arriba_antes.get(k) != s:
+                con.execute(
+                    "INSERT INTO arriba(clave, datos) VALUES (?, ?) "
+                    "ON CONFLICT(clave) DO UPDATE SET datos = excluded.datos",
+                    (k, s),
+                )
+                escribio = True
+        for k in arriba_antes:
+            if k not in arriba_despues:
+                con.execute("DELETE FROM arriba WHERE clave = ?", (k,))
+                escribio = True
+
+        return escribio, res
+    return _ejecutar_escritura_db(tx)
+
+
+def _sql_cambiar(usn, funcion):
+    clave = str(usn)
+    def tx(con):
+        row = con.execute("SELECT datos FROM cuentas WHERE usn = ?", (clave,)).fetchone()
+        if row is None:
+            return False, None
+        antes_raw = row[0]
+        acc = _loads(antes_raw)
+        nuevo = funcion(acc)
+        if nuevo is not None:
+            acc = nuevo
+        despues_raw = _dumps(acc)
+        if despues_raw != antes_raw:
+            con.execute("UPDATE cuentas SET datos = ? WHERE usn = ?", (despues_raw, clave))
+            return True, copy.deepcopy(acc)
+        return False, copy.deepcopy(acc)
+    return _ejecutar_escritura_db(tx)
+
+
+def _sql_leer_seccion(usn, seccion):
+    clave = str(usn)
+    def q(con):
+        row = con.execute("SELECT datos FROM cuentas WHERE usn = ?", (clave,)).fetchone()
+        if row is not None:
+            return _loads(row[0]).get(seccion) or {}
+        hr = con.execute("SELECT datos FROM arriba WHERE clave = 'huerfanas'").fetchone()
+        if hr is None:
+            return {}
+        return ((_loads(hr[0]) or {}).get(seccion) or {}).get(clave) or {}
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_cambiar_seccion(usn, seccion, funcion):
+    clave = str(usn)
+    def tx(con):
+        row = con.execute("SELECT datos FROM cuentas WHERE usn = ?", (clave,)).fetchone()
+        if row is not None:
+            antes_raw = row[0]
+            acc = _loads(antes_raw)
+            existia = seccion in acc
+            contenido = acc.setdefault(seccion, {})
+            res = funcion(contenido)
+            if not existia and not contenido:
+                del acc[seccion]
+            despues_raw = _dumps(acc)
+            if despues_raw != antes_raw:
+                con.execute("UPDATE cuentas SET datos = ? WHERE usn = ?", (despues_raw, clave))
+                return True, res
+            return False, res
+
+        hr = con.execute("SELECT datos FROM arriba WHERE clave = 'huerfanas'").fetchone()
+        antes_raw = hr[0] if hr is not None else None
+        huerf = _loads(antes_raw) if antes_raw is not None else {}
+        lugar = huerf.setdefault(seccion, {})
+        existia = clave in lugar
+        contenido = lugar.setdefault(clave, {})
+        res = funcion(contenido)
+        if not existia and not contenido:
+            del lugar[clave]
+        if not huerf.get(seccion):
+            huerf.pop(seccion, None)
+        if huerf:
+            despues_raw = _dumps(huerf)
+            if despues_raw != antes_raw:
+                con.execute(
+                    "INSERT INTO arriba(clave, datos) VALUES ('huerfanas', ?) "
+                    "ON CONFLICT(clave) DO UPDATE SET datos = excluded.datos",
+                    (despues_raw,),
+                )
+                return True, res
+            return False, res
+        if antes_raw is not None:
+            con.execute("DELETE FROM arriba WHERE clave = 'huerfanas'")
+            return True, res
+        return False, res
+    return _ejecutar_escritura_db(tx)
+
+
+def _sql_poner_secciones(seccion, contenidos):
+    if not contenidos:
+        _asegurar_db()
+        return None
+    def tx(con):
+        escribio = False
+        huerf_cargadas = False
+        huerf_antes = None
+        huerf = None
+        for usn, c in contenidos.items():
+            clave = str(usn)
+            row = con.execute("SELECT datos FROM cuentas WHERE usn = ?", (clave,)).fetchone()
+            if row is not None:
+                acc = _loads(row[0])
+                acc[seccion] = copy.deepcopy(c)
+                despues_raw = _dumps(acc)
+                if despues_raw != row[0]:
+                    con.execute("UPDATE cuentas SET datos = ? WHERE usn = ?", (despues_raw, clave))
+                    escribio = True
+            else:
+                if not huerf_cargadas:
+                    hr = con.execute("SELECT datos FROM arriba WHERE clave = 'huerfanas'").fetchone()
+                    huerf_antes = hr[0] if hr is not None else None
+                    huerf = _loads(huerf_antes) if huerf_antes is not None else {}
+                    huerf_cargadas = True
+                huerf.setdefault(seccion, {})[clave] = copy.deepcopy(c)
+        if huerf_cargadas:
+            despues_h = _dumps(huerf)
+            if despues_h != huerf_antes:
+                con.execute(
+                    "INSERT INTO arriba(clave, datos) VALUES ('huerfanas', ?) "
+                    "ON CONFLICT(clave) DO UPDATE SET datos = excluded.datos",
+                    (despues_h,),
+                )
+                escribio = True
+        return escribio, None
+    return _ejecutar_escritura_db(tx)
+
+
+def _sql_huerfanas():
+    def q(con):
+        hr = con.execute("SELECT datos FROM arriba WHERE clave = 'huerfanas'").fetchone()
+        return (_loads(hr[0]) or {}) if hr is not None else {}
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_usuarios():
+    def q(con):
+        rows = con.execute("SELECT steamid, datos FROM usuarios ORDER BY rowid").fetchall()
+        return {k: _loads(v) for k, v in rows}
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_usuario(steamid):
+    clave = str(steamid)
+    def q(con):
+        row = con.execute("SELECT datos FROM usuarios WHERE steamid = ?", (clave,)).fetchone()
+        return _loads(row[0]) if row is not None else None
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_usuario_por(campo, valor):
+    usa_extract = isinstance(valor, (int, float, str)) and not isinstance(valor, bool)
+    ruta_j = "$.%s" % campo
+    def q(con):
+        if usa_extract:
+            try:
+                rows = con.execute(
+                    "SELECT datos FROM usuarios WHERE json_extract(datos, ?) = ? ORDER BY rowid",
+                    (ruta_j, valor),
+                ).fetchall()
+            except sqlite3.OperationalError:
+                rows = con.execute("SELECT datos FROM usuarios ORDER BY rowid").fetchall()
+        else:
+            rows = con.execute("SELECT datos FROM usuarios ORDER BY rowid").fetchall()
+        for (raw,) in rows:
+            u = _loads(raw)
+            if u.get(campo) == valor:
+                return u
+        return None
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_guardar_sesion(gsn, datos_sesion):
+    ahora = time.time()
+    clave_g = str(gsn)
+    registro = {
+        "clave": str(datos_sesion["clave"]),
+        "sesion_id": int(datos_sesion["sesion_id"]),
+        "usuario": str(datos_sesion["usuario"]),
+        "expira": float(datos_sesion["expira"]),
+    }
+    raw = _dumps(registro)
+    def tx(con):
+        con.execute("DELETE FROM sesiones WHERE expira < ?", (ahora,))
+        con.execute(
+            "INSERT INTO sesiones(gsn, datos, expira) VALUES (?, ?, ?) "
+            "ON CONFLICT(gsn) DO UPDATE SET datos = excluded.datos, expira = excluded.expira",
+            (clave_g, raw, registro["expira"]),
+        )
+        return True, copy.deepcopy(registro)
+    return _ejecutar_escritura_db(tx)
+
+
+def _sql_sesion(gsn):
+    clave_g = str(gsn)
+    def q(con):
+        row = con.execute("SELECT datos FROM sesiones WHERE gsn = ?", (clave_g,)).fetchone()
+        if row is None:
+            return None
+        s = _loads(row[0])
+        return s if isinstance(s, dict) else None
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_leer_arriba(clave, defecto=None):
+    k = str(clave)
+    if k in _CLAVES_TABLA:
+        raise ValueError("clave reservada: %s" % k)
+    def q(con):
+        row = con.execute("SELECT datos FROM arriba WHERE clave = ?", (k,)).fetchone()
+        return _loads(row[0]) if row is not None else copy.deepcopy(defecto)
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_cambiar_arriba(clave, funcion, defecto=None):
+    k = str(clave)
+    if k in _CLAVES_TABLA:
+        raise ValueError("clave reservada: %s" % k)
+    def tx(con):
+        row = con.execute("SELECT datos FROM arriba WHERE clave = ?", (k,)).fetchone()
+        antes_raw = row[0] if row is not None else None
+        valor = _loads(antes_raw) if antes_raw is not None else copy.deepcopy(defecto)
+        res = funcion(valor)
+        despues_raw = _dumps(valor)
+        if antes_raw is None and valor == defecto:
+            return False, res
+        if despues_raw != antes_raw:
+            con.execute(
+                "INSERT INTO arriba(clave, datos) VALUES (?, ?) "
+                "ON CONFLICT(clave) DO UPDATE SET datos = excluded.datos",
+                (k, despues_raw),
+            )
+            return True, res
+        return False, res
+    return _ejecutar_escritura_db(tx)
+
+
+# ---------- API publica ----------
 
 def todas():
     """{usn en texto: cuenta} de todas las cuentas (copia)."""
+    if _usar_sqlite():
+        return _sql_todas()
     return _cargar()["cuentas"]
 
 
 def leer(usn):
     """La cuenta de ese usn (copia) o None."""
+    if _usar_sqlite():
+        return _sql_leer(usn)
     return todas().get(str(usn))
 
 
 def buscar(seccion, campo, valor):
     """(usn en texto, cuenta) de la primera cuenta cuya seccion tiene campo == valor, o (None, None)."""
+    if _usar_sqlite():
+        return _sql_buscar(seccion, campo, valor)
     for k, acc in todas().items():
         if (acc.get(seccion) or {}).get(campo) == valor:
             return k, acc
@@ -315,19 +954,23 @@ def buscar(seccion, campo, valor):
 def cambiar_todas(funcion):
     """Con el candado: relee, llama funcion(d) sobre {"cuentas": {...}} y escribe. Devuelve lo que devuelva funcion.
     Si funcion falla no se escribe nada."""
+    if _usar_sqlite():
+        return _sql_cambiar_todas(funcion)
     _asegurar()               # fuera del candado: la mudanza toma el suyo
     with _Candado():
         d = _cargar(False)
         antes = copy.deepcopy(d)
         res = funcion(d)
         if d != antes:
-            _escribir(ruta(), d)
+            _escribir(_ruta_json(), d)
         return res
 
 
 def cambiar(usn, funcion):
     """Con el candado: relee la cuenta, llama funcion(cuenta) (cambia el dict, o devuelve uno nuevo) y la escribe.
     Devuelve la cuenta ya cambiada, o None si no existe."""
+    if _usar_sqlite():
+        return _sql_cambiar(usn, funcion)
     def f(d):
         acc = d["cuentas"].get(str(usn))
         if acc is None:
@@ -354,6 +997,8 @@ def todas_planas():
 def leer_seccion(usn, seccion):
     """Copia de la seccion (tienda, amigos, pareja) de ese usn; {} si no tiene. Si el usn no es de ninguna cuenta (p. ej. 0,
     la sesion capturada) la busca en las huerfanas."""
+    if _usar_sqlite():
+        return _sql_leer_seccion(usn, seccion)
     d = _cargar()
     acc = d["cuentas"].get(str(usn))
     if acc is not None:
@@ -365,6 +1010,8 @@ def cambiar_seccion(usn, seccion, funcion):
     """Con el candado: relee, llama funcion(contenido) con la seccion de ese usn (un dict que funcion cambia EN EL LUGAR) y
     escribe si cambio. Si el usn no es de ninguna cuenta usa la huerfana d["huerfanas"][seccion][usn]. Devuelve lo que
     devuelva funcion (que devuelva copias, no el dict). Una seccion que quedo vacia no deja entrada nueva."""
+    if _usar_sqlite():
+        return _sql_cambiar_seccion(usn, seccion, funcion)
     def f(d):
         clave = str(usn)
         acc = d["cuentas"].get(clave)
@@ -388,6 +1035,8 @@ def cambiar_seccion(usn, seccion, funcion):
 def poner_secciones(seccion, contenidos):
     """Con el candado: pone contenidos[usn] como la seccion de cada usn (cuenta, o huerfana si no es de ninguna). Solo toca
     los usn que le pasan. Para quien ya tiene armado el diccionario entero."""
+    if _usar_sqlite():
+        return _sql_poner_secciones(seccion, contenidos)
     def f(d):
         for usn, c in contenidos.items():
             acc = d["cuentas"].get(str(usn))
@@ -400,21 +1049,29 @@ def poner_secciones(seccion, contenidos):
 
 def huerfanas():
     """{seccion: {usn: contenido}} de lo que vino de los archivos viejos y no tiene cuenta (copia)."""
+    if _usar_sqlite():
+        return _sql_huerfanas()
     return _cargar().get("huerfanas") or {}
 
 
 def usuarios():
     """{steamid: usuario} de todas las cuentas Eñeños (copia)."""
+    if _usar_sqlite():
+        return _sql_usuarios()
     return copy.deepcopy(_cargar().get("usuarios") or {})
 
 
 def usuario(steamid):
     """La cuenta Eñeños de ese steamid (copia) o None."""
+    if _usar_sqlite():
+        return _sql_usuario(steamid)
     return copy.deepcopy((_cargar().get("usuarios") or {}).get(str(steamid)))
 
 
 def usuario_por_gsn(gsn):
     """La cuenta Eñeños cuyo gsn coincide (copia) o None."""
+    if _usar_sqlite():
+        return _sql_usuario_por("gsn", gsn)
     for u in (_cargar().get("usuarios") or {}).values():
         if u.get("gsn") == gsn:
             return copy.deepcopy(u)
@@ -423,7 +1080,66 @@ def usuario_por_gsn(gsn):
 
 def usuario_por_puerto(puerto):
     """La cuenta Eñeños cuyo puerto coincide (copia) o None."""
+    if _usar_sqlite():
+        return _sql_usuario_por("puerto", puerto)
     for u in (_cargar().get("usuarios") or {}).values():
         if u.get("puerto") == puerto:
             return copy.deepcopy(u)
     return None
+
+
+def guardar_sesion(gsn, datos_sesion):
+    """Con el candado: guarda datos_sesion en d['sesiones'][str(gsn)] y poda las sesiones vencidas."""
+    if _usar_sqlite():
+        return _sql_guardar_sesion(gsn, datos_sesion)
+    ahora = time.time()
+
+    def f(d):
+        sesiones = d.setdefault("sesiones", {})
+        for k in [k for k, v in list(sesiones.items()) if not isinstance(v, dict) or v.get("expira", 0) < ahora]:
+            del sesiones[k]
+        clave_g = str(gsn)
+        sesiones[clave_g] = {
+            "clave": str(datos_sesion["clave"]),
+            "sesion_id": int(datos_sesion["sesion_id"]),
+            "usuario": str(datos_sesion["usuario"]),
+            "expira": float(datos_sesion["expira"]),
+        }
+        return copy.deepcopy(sesiones[clave_g])
+    return cambiar_todas(f)
+
+
+def sesion(gsn):
+    """La sesion guardada de ese gsn (copia) o None."""
+    if _usar_sqlite():
+        return _sql_sesion(gsn)
+    s = (_cargar().get("sesiones") or {}).get(str(gsn))
+    return copy.deepcopy(s) if isinstance(s, dict) else None
+
+
+def leer_arriba(clave, defecto=None):
+    """Copia de una clave de arriba del almacen de cuentas (tabla `arriba` con CUENTA_SQLITE=1), o `defecto` si falta."""
+    k = str(clave)
+    if k in _CLAVES_TABLA:
+        raise ValueError("clave reservada: %s" % k)
+    if _usar_sqlite():
+        return _sql_leer_arriba(k, defecto)
+    d = _cargar()
+    return copy.deepcopy(d[k]) if k in d else copy.deepcopy(defecto)
+
+
+def cambiar_arriba(clave, funcion, defecto=None):
+    """Con el candado: relee la clave de arriba `clave`, llama funcion(valor) en el lugar y guarda si cambio."""
+    k = str(clave)
+    if k in _CLAVES_TABLA:
+        raise ValueError("clave reservada: %s" % k)
+    if _usar_sqlite():
+        return _sql_cambiar_arriba(k, funcion, defecto)
+    def f(d):
+        existia = k in d
+        valor = d[k] if existia else copy.deepcopy(defecto)
+        res = funcion(valor)
+        if existia or valor != defecto:
+            d[k] = valor
+        return res
+    return cambiar_todas(f)

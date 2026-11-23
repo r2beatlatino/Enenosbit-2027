@@ -6,13 +6,17 @@ servidor/carrera.py
 servidor/casa.py
 servidor/catalogo.py
 servidor/charla.py
+servidor/circulo.py
 servidor/correo.py
 servidor/cuenta.py
 servidor/cuenta_local.py
 servidor/cuentas.py
+servidor/cupon.py
+servidor/panel_interno.py
 servidor/estado.py
 servidor/fichas.py
 servidor/gemas.py
+servidor/gm.py
 servidor/granja.py
 servidor/jardin.py
 servidor/juego.py

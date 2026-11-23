@@ -23,18 +23,23 @@ falte). Lo que siga —el perfil, los personajes— sale de reproducir la sesion
 Uso:  python juego.py          (o se arranca junto con login.py)
 """
 import asyncio
+import hmac
 import os
 import struct
 import time
 
 import ajustes
 import captura
+import cuenta
 import cuentas
 import estado
 import fichas
 import manejadores
 import neutro
+import panel_interno
 import recarga
+
+SESION_TTL = 86_400
 
 # Lo que es regla o armado de mensajes (manejadores.py y los modulos que carga, fichas.py, practica.py, cuenta_local.py) se
 # recarga solo cuando cambia su archivo, sin reiniciar el servidor: lo hace recarga.py (archivo quieto, compila antes de
@@ -46,7 +51,9 @@ manejadores_al_dia = recarga.revisar
 PUERTOS = list(ajustes.PUERTOS_JUEGO)          # ajustes.py: variable PUERTOS_JUEGO
 # 29-oct: y el puerto de cada cuenta LOCAL (cuentas.py): la lista de canales que les da login.py apunta ahi, y por el
 # puerto se sabe QUE cuenta se conecta (su FF02 de 168 B viene cifrado). CUENTAS_LOCALES=0 los apaga.
-if ajustes.CUENTAS_LOCALES:
+# M01b (22-nov): con IDENTIDAD_FF02 (modo pase) todos entran por el puerto compartido y la cuenta sale del FF02: los puertos
+# por cuenta ya no se abren (el login no los anuncia mas).
+if ajustes.CUENTAS_LOCALES and not cuentas.identidad_ff02():
     PUERTOS += [p for p in cuentas.PUERTOS if p not in PUERTOS]
 HOSTS = ajustes.HOSTS
 AQUI = ajustes.AQUI
@@ -282,18 +289,23 @@ class Juego(asyncio.Protocol):
 
     def __init__(self, puerto):
         self.puerto, self.buf = puerto, b""
+        self.id_con = next(estado.NUMEROS_DE_CONEXION)
+        self.cerrada = False
         self.llave = LLAVE
-        if REPRODUCIR:
+        por_ff02 = cuentas.identidad_ff02()
+        if REPRODUCIR and not por_ff02:
             lotes = captura.lotes_capturados()
             self.lotes = lotes if ajustes.pase_activo() else [captura.con_llave(x) for x in lotes]
         else:
             self.lotes = []
-        # 29-oct: una cuenta LOCAL (por el puerto, ver cuentas.py) recibe SU ficha en el FF00
-        self.cuenta = cuentas.por_puerto(puerto) if puerto in cuentas.PUERTOS else None
+        # 29-oct: una cuenta LOCAL (por el puerto, ver cuentas.py) recibe SU ficha en el FF00.
+        # M01: con IDENTIDAD_FF02 activa en modo pase, self.cuenta = None en TODOS los puertos y se arma en el FF02.
+        self.cuenta = None if por_ff02 else (cuentas.por_puerto(puerto) if puerto in cuentas.PUERTOS else None)
         # 01-nov: la constante del XOR depende del usn del personaje (k_para); la de la captura da 0x0D
         self.k = k_para(self.cuenta["usn"]) if self.cuenta is not None and self.cuenta.get("usn") else 0x0D
         # la rafaga de entrada: lista de canciones recortada y, en una cuenta local, SU ficha y SU ropa (fichas.py)
-        self.lotes = fichas.lotes_de_entrada(self.lotes, self.cuenta)
+        if not por_ff02:
+            self.lotes = fichas.lotes_de_entrada(self.lotes, self.cuenta)
         self.partida = 0x0f3d    # el numero de partida del FF3A (el oficial mando 0x0f3d); practica.py la sube de a una
         self.i_lote = 0          # cual es el proximo lote capturado por mandar
         self.i_patron = 0        # donde estamos en PATRON
@@ -303,21 +315,27 @@ class Juego(asyncio.Protocol):
         self.pidio_sala = 0      # hora (time.time) del ultimo FF15 que pidio (salas.info); carrera.revisar la compara con la vuelta del coop
         self.turno = {}          # responder_por_id: cuantas veces se uso cada respuesta capturada, {(metodo, canal): n}
         self.intento_mision = None   # misiones.py: el intento de mision en curso (dict: usn, familia, codigo, t0, ...)
+        self.t_conexion = time.time()
 
     def connection_made(self, tr):
         self.tr = tr
-        estado.CONEXIONES[self.puerto] = self
+        estado.CONEXIONES[self.id_con] = self
         anotar(":%d CONEXION desde %s" % (self.puerto, tr.get_extra_info("peername")))
         if self.cuenta is not None:
             anotar("   es la cuenta LOCAL %s (usn %d, XOR 0x%02x, %s)" % (self.cuenta["nick"], self.cuenta["usn"], self.k,
                    "personaje %d" % self.cuenta["personaje"]["char_id"] if self.cuenta["personaje"] else "sin personaje"))
-        elif self.puerto in cuentas.PUERTOS:
+        elif self.puerto in cuentas.PUERTOS and not cuentas.identidad_ff02():
             anotar("   ⚠ el puerto %d no es de ninguna cuenta local: va la sesion capturada" % self.puerto)
-        if REPRODUCIR:
+        if REPRODUCIR and not cuentas.identidad_ff02():
             anotar("   reproduccion: %d lotes capturados listos (%d bytes)"
                    % (len(self.lotes), sum(len(x) for x in self.lotes)))
             if not self.lotes:
                 anotar("   ⚠ no hay lotes: falta %s" % RUTA_LOTES)
+
+    def _rechazar_ff02(self, motivo):
+        anotar("   ⛔ FF02 rechazado (%s); cierro conexion" % motivo)
+        self.cerrada = True
+        self.tr.close()
 
     def mandar_claro(self, claro):
         """Un mensaje en claro (un FF56) al cliente: sube el seq y lo manda cifrado en un FF55 con NUESTRA clave."""
@@ -464,6 +482,8 @@ class Juego(asyncio.Protocol):
             self.i_patron += 1
 
     def data_received(self, d):
+        if self.cerrada:
+            return
         # ⭐ 22-oct: el registro CRUDO. El cliente manda `SendCheckVer` y `SendLogin` con 35 ms de
         # diferencia (su log: Network.cpp) y despues aborta la conexion; con el cierre abortivo los
         # bytes que no alcanzamos a leer se DESCARTAN, asi que sin esto no se sabe si el FF02 llego
@@ -475,6 +495,8 @@ class Juego(asyncio.Protocol):
         if self.buf:
             anotar("   ⚠ quedan %d bytes SIN ENCUADRAR: %s" % (len(self.buf), self.buf[:32].hex(" ")))
         for cmd, seq, cuerpo in ms:
+            if self.cerrada:
+                break
             if cmd == 0x04:
                 anotar(":%d C2S FF04 hola (%d B): %s" % (self.puerto, len(cuerpo), cuerpo.hex()))
                 r = FF04 + struct.pack("<I", int(time.time()))
@@ -483,7 +505,54 @@ class Juego(asyncio.Protocol):
             elif cmd == 0x02:
                 anotar(":%d C2S FF02 login del juego (%d B)" % (self.puerto, len(cuerpo)))
                 llave_con = self.llave
-                if ajustes.pase_activo():
+                if cuentas.identidad_ff02():
+                    info = captura.leer_c2s_ff02_juego(cuerpo)
+                    if info is None:
+                        self._rechazar_ff02("cuerpo FF02 malformado o cifrado invalido")
+                        return
+                    gsn, usn, clave_c2s, ses_id_c2s = info["gsn"], info["usn"], info["s2"], info["sesion_id"]
+                    ses = cuenta.sesion(gsn)
+                    ahora = time.time()
+                    if ses is None or ses.get("expira", 0) < ahora:
+                        self._rechazar_ff02("sin sesion activa para gsn %d" % gsn)
+                        return
+                    clave_ses = ses.get("clave")
+                    if not isinstance(clave_ses, str) or not isinstance(clave_c2s, str) or not hmac.compare_digest(clave_c2s, clave_ses):
+                        self._rechazar_ff02("clave de sesion invalida para gsn %d" % gsn)
+                        return
+                    if not ses_id_c2s or int(ses.get("sesion_id", 0)) != int(ses_id_c2s):
+                        self._rechazar_ff02("sesion_id invalido para gsn %d" % gsn)
+                        return
+                    u = cuentas.usuario_por_steamid(ses.get("usuario", ""))
+                    if u is None or u.get("gsn") != gsn:
+                        self._rechazar_ff02("usuario inexistente para gsn %d" % gsn)
+                        return
+                    if not usn or (usn not in (u.get("usns") or []) and usn != u.get("pendiente_usn")):
+                        self._rechazar_ff02("usn %d no pertenece a gsn %d" % (usn, gsn))
+                        return
+                    cta = cuentas.por_usn(usn)
+                    if cta is None:
+                        self._rechazar_ff02("cuenta no encontrada para usn %d" % usn)
+                        return
+                    ses["expira"] = ahora + SESION_TTL
+                    cuenta.guardar_sesion(gsn, ses)
+                    for k_con, otra in list(estado.CONEXIONES.items()):
+                        if otra is not self and (otra.cuenta or {}).get("usn") == usn:
+                            anotar("   sesion duplicada: cierro la anterior")
+                            estado.CONEXIONES.pop(k_con, None)
+                            otra.cerrada = True
+                            otra.tr.close()
+                    self.cuenta = cta
+                    self.k = k_para(usn)
+                    self.llave = info["llave"]
+                    llave_con = info["llave"]
+                    # como el __init__ de siempre: sin REPRODUCIR los lotes van vacios, pero lotes_de_entrada arma igual la
+                    # rafaga neutra (FF00) si falta lotes_S2C.bin (modo VPS)
+                    lotes_base = fichas.lotes_de_entrada(captura.lotes_capturados() if REPRODUCIR else [], self.cuenta)
+                    self.lotes = [captura.con_llave(x, llave_con) for x in lotes_base] if lotes_base else []
+                    anotar("   cuenta por FF02: %s usn %d (sesion valida)" % (self.cuenta["nick"], usn))
+                    anotar("   llave de hardware del cliente (PASE=si): %d B -> usada en S2C FF02" % len(cuerpo))
+                elif ajustes.pase_activo():
                     llave_cli = captura.llave_de_c2s_ff02(cuerpo)
                     if llave_cli is not None:
                         self.llave = llave_cli
@@ -507,6 +576,9 @@ class Juego(asyncio.Protocol):
                 else:
                     self.mandar_todo()
             elif cmd == 0x55:
+                if cuentas.identidad_ff02() and self.cuenta is None:
+                    self._rechazar_ff02("FF55 sin FF02 autenticado")
+                    return
                 claro = descifrar(cuerpo, CLAVE)
                 dentro = "FF%02X" % claro[1] if len(claro) > 1 and claro[0] == 0xFF else "?"
                 nom = self.nombre_pedido(claro)
@@ -534,8 +606,8 @@ class Juego(asyncio.Protocol):
                 anotar(":%d C2S FF%02X (%d B) (sin respuesta todavia)" % (self.puerto, cmd, len(cuerpo)))
 
     def connection_lost(self, exc):
-        if estado.CONEXIONES.get(self.puerto) is self:
-            del estado.CONEXIONES[self.puerto]
+        if estado.CONEXIONES.get(self.id_con) is self:
+            del estado.CONEXIONES[self.id_con]
         manejadores.desconectado(self)     # 01-nov: la conexion caida saca al jugador de su sala (como salir)
         anotar(":%d se cerro la conexion (%s)  lotes entregados: %d/%d%s"
                % (self.puerto, exc or "normal", self.i_lote, len(self.lotes),
@@ -546,6 +618,7 @@ class Juego(asyncio.Protocol):
 async def main():
     estado.anotar = anotar
     recarga.iniciar(anotar)
+    cuenta.preparar(anotar)          # M09: con CUENTA_SQLITE=1, cuentas.db listo (y migrado) al arrancar
     anotar("llave de hardware: %s (la de la captura: %s)%s" % (
         "0x%08x" % LLAVE if LLAVE is not None else "NO SE PUDO LEER", "0x%08x" % LLAVE_CAP if LLAVE_CAP else "-",
         "" if LLAVE is None or LLAVE == LLAVE_CAP else " -> va la de ESTA maquina en el FF02 y en los FF05"))
@@ -553,6 +626,7 @@ async def main():
         for p in PUERTOS:
             await asyncio.get_running_loop().create_server(lambda p=p: Juego(p), h, p)
             anotar("escuchando en %s:%d" % (h, p))
+    await panel_interno.iniciar(anotar)
     await asyncio.Event().wait()
 
 

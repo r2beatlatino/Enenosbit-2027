@@ -15,6 +15,7 @@ SALDO_INICIAL (diamantes de una cuenta nueva) es una DECISION local, no del ofic
 """
 import copy
 import json
+import os
 import struct
 import time
 
@@ -224,6 +225,26 @@ def dar_objeto(usn, item, cantidad=1, vence=PERMANENTE, con=None):
     if res["estado"] == DADO:
         avisar_ffce(con, item, cantidad)
     return res
+
+
+def gastar_objeto(usn, item, cantidad=1):
+    """M10: descuenta `cantidad` unidades de `item` de la seccion `tienda` de `usn`, con el candado de cuenta.py (comprobar y gastar
+    en UNA sola operacion). Cuenta lo que tiene en cantidad >= `cantidad` y sin plazo vencido; el registro que llega a 0 se borra.
+    -> la cantidad que le queda, o None si no lo tiene (no escribe nada). No crea la bolsa ni da regalos."""
+    if not isinstance(cantidad, int) or isinstance(cantidad, bool) or cantidad < 1:
+        return None
+    ahora = time.time()
+
+    def quitar(b):
+        for reg in b.get("items", []):
+            if reg[0] == item and (_permanente(reg[1]) or reg[1] > ahora) and reg[2] >= cantidad:
+                reg[2] -= cantidad
+                if reg[2] <= 0:
+                    b["items"].remove(reg)
+                    return 0
+                return reg[2]
+        return None
+    return _cta.cambiar_seccion(str(usn), "tienda", quitar)
 
 
 def exp_de(con):
@@ -475,18 +496,23 @@ def _partir_ff49(cu):
 
 def inventario(con, seq, cuerpo):
     """C2S FF49 SendGetDressList (0 B) -> S2C FF49 con lo que COMPRO esta cuenta (cuenta.json, seccion tienda), sobre la cabeza y la
-    cola de la respuesta capturada. ⏳ La ropa de la plantilla (la de la cuenta capturada) NO va: solo lo comprado."""
+    cola de la respuesta capturada (o armadas por campos si falta la captura y FF49_NEUTRO=1). ⏳ La ropa de la plantilla (la de la cuenta capturada) NO va: solo lo comprado."""
     if cuerpo:
         return False
     plantilla = captura.cuerpo_capturado(0x49)
     if plantilla is None:
-        anotar("   ⛔ FF49: no hay plantilla capturada; sin respuesta propia")
-        return False
-    try:
-        cabeza, _items, cola = _partir_ff49(plantilla)
-    except (ValueError, IndexError, struct.error) as e:
-        anotar("   ⛔ FF49: la plantilla no tiene la forma medida (%s)" % e)
-        return False
+        if os.environ.get("FF49_NEUTRO", "1").lower() not in ("1", "si"):
+            anotar("   ⛔ FF49: no hay plantilla capturada; sin respuesta propia")
+            return False
+        import neutro
+        cabeza, cola = neutro.ff49_cabeza_cola(con.cuenta)
+        anotar("   FF49 sin plantilla: cabeza y cola armadas por campos (neutro.ff49_cabeza_cola)")
+    else:
+        try:
+            cabeza, _items, cola = _partir_ff49(plantilla)
+        except (ValueError, IndexError, struct.error) as e:
+            anotar("   ⛔ FF49: la plantilla no tiene la forma medida (%s)" % e)
+            return False
     items = _con_bolsa(con, lambda b: copy.deepcopy(b["items"]))
     mios = [struct.pack("<IIBHIH", it, fichas.vence_al_cable(vence), 0, cant, fecha, 0) for it, vence, cant, fecha in items]
     con.mandar_interno(0x49, seq, cabeza + struct.pack("<H", len(mios)) + b"".join(mios) + cola)
