@@ -618,6 +618,7 @@ class Juego(asyncio.Protocol):
 async def main():
     estado.anotar = anotar
     recarga.iniciar(anotar)
+    cuenta.preparar(anotar)          # M09: con CUENTA_SQLITE=1, cuentas.db listo (y migrado) al arrancar
     anotar("llave de hardware: %s (la de la captura: %s)%s" % (
         "0x%08x" % LLAVE if LLAVE is not None else "NO SE PUDO LEER", "0x%08x" % LLAVE_CAP if LLAVE_CAP else "-",
         "" if LLAVE is None or LLAVE == LLAVE_CAP else " -> va la de ESTA maquina en el FF02 y en los FF05"))
