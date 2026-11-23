@@ -221,6 +221,35 @@ def _personajes_de_usuario(steamid, todas):
     return out
 
 
+def _sexo_de(pj):
+    """"m"/"f" desde char_id (0x1FF54.. como _descripcion_personaje: impar desde la base = mujer); None si no esta creado."""
+    cid = pj.get("char_id") if isinstance(pj, dict) else None
+    if isinstance(cid, int) and 0x1FF54 <= cid <= 0x1FF5F:
+        return "f" if (cid - 0x1FF54) & 1 else "m"
+    return None
+
+
+def _get_personajes(query):
+    """23-nov (maduracion, para el launcher: los minichars de la cuenta). GET personajes?enenos_id=<n> -> los personajes de
+    `e<n>` sin los borrados, con sexo y conectado. `nivel` va en null: el servidor no tiene la tabla de niveles del jugador
+    (la calcula el cliente con la del exe) y no se inventa. Cuenta inexistente -> lista vacia (200)."""
+    crudo = (query.get("enenos_id") or [""])[0].strip()
+    if not crudo.isdigit() or int(crudo) <= 0 or len(crudo) > 12:
+        return 400, {"error": "El parámetro enenos_id debe ser un número entero positivo."}
+    steamid = "e%d" % int(crudo)
+    maximo = cuentas.MAX_PERSONAJES
+    if cuenta.usuario(steamid) is None:
+        return 200, {"personajes": [], "maximo": maximo}
+    todas = cuenta.todas()
+    vivos = _mapa_conectados()
+    out = []
+    for p in _personajes_de_usuario(steamid, todas):
+        acc = todas.get(str(p["id"])) or {}
+        out.append({"id": p["id"], "nick": p["nick"], "sexo": _sexo_de(acc.get("personaje")), "nivel": None,
+                    "conectado": p["id"] in vivos})
+    return 200, {"personajes": out, "maximo": maximo}
+
+
 class _ConCuenta:
     """Envoltorio minimo para operar con tienda.py cuando el jugador no esta conectado."""
 
@@ -531,6 +560,8 @@ def despachar(metodo, objetivo, cabeceras, cuerpo=b""):
             return _get_conectados()
         if subruta == "buscar":
             return _get_buscar(query)
+        if subruta == "personajes":
+            return _get_personajes(query)
         if subruta.startswith("ficha/"):
             resto = subruta[len("ficha/"):]
             if resto and "/" not in resto:
