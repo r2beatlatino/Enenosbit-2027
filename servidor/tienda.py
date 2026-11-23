@@ -88,7 +88,11 @@ def bolsa(con):
 # DECISION (Eñeños la confirma): cada cuenta recibe una vez REGALOS. ⏳ la cantidad y si se gastan al jugar.
 # + 3-nov: un 金戒指 = el 玩伴信物 para proponer pareja. El inventario guarda el INDEX de ring.txt (30xxx; la ficha del
 # oficial trae 30084), no el ChargeId (36xxx): con 36005 no aparecia
-REGALOS = {11000491: 10, 30005: 1}
+# 23-nov (maduracion, pedido del dueño): el modo R-Note (节奏达人) pide "item ticket": 99 de cada entrada R-Note, permanentes.
+#   11000202 = 节奏达人入场券 y 11000180 = 节奏达人入场券free (config/items_tbitems.json, por cantidad; los dos en shop.txt,
+#   pestana 509). Las cuentas que ya existen los reciben una vez (_preparar da los que falten).
+#   ⏳ Si el cliente gasta uno por partida y el servidor tiene que descontarlo: sin medir.
+REGALOS = {11000491: 10, 30005: 1, 11000202: 99, 11000180: 99}
 
 
 def acreditar(con, exp=0, g=0):
