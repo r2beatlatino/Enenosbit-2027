@@ -518,8 +518,16 @@ class Juego(asyncio.Protocol):
                         return
                     clave_ses = ses.get("clave")
                     if not isinstance(clave_ses, str) or not isinstance(clave_c2s, str) or not hmac.compare_digest(clave_c2s, clave_ses):
-                        self._rechazar_ff02("clave de sesion invalida para gsn %d" % gsn)
-                        return
+                        # 23-nov (maduracion, cerebro), MEDIDO con el juego: al volver a entrar desde el selector (tras 角色选择)
+                        # el FF02 de juego es mas corto (136 B, no 168) y no trae la clave en s2. Como en login.py: se acepta
+                        # con gsn + sesion_id de la sesion VIVA, solo si el FF02 tiene esa forma corta. RECONEXION_SESION=0 lo apaga.
+                        reconexion = ((os.environ.get("RECONEXION_SESION") or "1").strip().lower() in ("1", "si")
+                                      and len(cuerpo) < 168 and ses_id_c2s and int(ses.get("sesion_id", 0)) == int(ses_id_c2s))
+                        anotar("   FF02 de juego %d B: s1 %d B, s2 %d B, s3 %d B, s4 %d B; reconexion: %s" % (
+                            len(cuerpo), len(info["s1"]), len(info["s2"]), len(info["s3"]), len(info["s4"]), "si" if reconexion else "no"))
+                        if not reconexion:
+                            self._rechazar_ff02("clave de sesion invalida para gsn %d" % gsn)
+                            return
                     if not ses_id_c2s or int(ses.get("sesion_id", 0)) != int(ses_id_c2s):
                         self._rechazar_ff02("sesion_id invalido para gsn %d" % gsn)
                         return

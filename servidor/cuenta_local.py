@@ -199,6 +199,8 @@ LLAVES_OMISION = {
     "HORA_REAL": "1",
     "MEDALLAS_CANCION": "1",
     "SALDOS_AL_DIA": "1",
+    "CLOSEME2": "1",
+    "CLOSEME_CIERRA": "1",
 }
 
 
@@ -265,6 +267,37 @@ def pedido_funcion(con, seq, cuerpo):
     con.mandar_interno(0x247, seq, cap)
     anotar("   S2C FF247 CmdFunction: %02x (pedido %d de esta conexion)" % (cap[0], n + 1))
     return True if es_neutro else False        # False a proposito: el resto del camino de hoy (seguir_patron) queda igual; con la rafaga ya mandada no hace nada
+
+
+def cerrarme(con, seq, cuerpo):
+    """22-nov (maduracion, cerebro): C2S FF3D SendCloseMe (3 B, MEDIDO) llega justo despues del S2C FF240 al tocar 角色选择: el
+    cliente ESPERA que el SERVER le cierre la conexion de juego (asi la da por terminada y vuelve al login / selector).
+    Mismo diseño que el 2013 (lobby.py, CERRAR_LOBBY_EN_SWITCH: "el cliente NO cierra solo"). En los registros de prod y prueba
+    el FF3D solo aparece al salir (selector o cerrar el juego), siempre seguido del cierre: se cierra con cualquier FF3D.
+    Llave CLOSEME_CIERRA=0 lo apaga (como antes: no se cierra)."""
+    if not llave("CLOSEME_CIERRA"):
+        return False
+    anotar("   C2S FF3D CloseMe (%s): cierro la conexion de juego para que el cliente vuelva al selector" % cuerpo.hex(" "))
+    tr = getattr(con, "tr", None)
+    if tr is not None:
+        import asyncio
+        try:
+            asyncio.get_running_loop().call_later(0.2, tr.close)
+        except RuntimeError:
+            tr.close()
+    return True
+
+
+def cerrarme2(con, seq, cuerpo):
+    """22-nov (maduracion, cerebro): C2S FF240 SendCloseMe2 (0 B) -> S2C FF240 CmdCloseMe2 (0 B). Lo manda el cliente al tocar
+    角色选择 (volver al selector de personaje) y ESPERA la respuesta: sin ella muestra 与服务器断开 (30005) con las dos conexiones
+    vivas (MEDIDO con el juego, 22-nov, `_fuera_git/vivo_M01/SELECTOR_235300`). CmdCloseMe2 existe en el exe (tabla_ff_cruce:
+    rx=True, lect=[] = no lee campos); 0 grabaciones del oficial. Llave CLOSEME2=0 lo apaga (como antes: sin respuesta)."""
+    if not llave("CLOSEME2"):
+        return False
+    con.mandar_interno(0x240, seq, b"")
+    anotar("   S2C FF240 CmdCloseMe2 (vuelta al selector de personaje)")
+    return True
 
 
 def pedido_hora(con, seq, cuerpo):
@@ -334,6 +367,8 @@ MANEJADORES = {
     0x0C: lista_sala,
     0x247: pedido_funcion,
     0x97: pedido_hora,
+    0x240: cerrarme2,
+    0x3D: cerrarme,
     0x267: popup_entrada,
     0x246: pedido_medallas_cancion,
 }
