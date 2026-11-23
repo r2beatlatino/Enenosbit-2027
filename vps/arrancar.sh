@@ -15,6 +15,8 @@ export SIN_CANAL_BAILE="${SIN_CANAL_BAILE:-1}"  # Modo Baile abre en el servidor
 export GESTOS_TODOS="${GESTOS_TODOS:-1}"        # hola, po, gracias... en todos los idiomas
 # 22-nov (maduracion M09): cuentas en SQLite WAL (cuentas.db). La 1.a vez migra cuenta.json y lo deja intacto de respaldo.
 export CUENTA_SQLITE="${CUENTA_SQLITE:-1}"
+# 23-nov (maduracion M19): nombre del canal en la lista (la ñ no se dibuja en esa parte del cliente: medido)
+export CANAL="${CANAL:-N2server}"
 
 if [ -z "${IP_JUEGO:-}" ]; then
   echo "ERROR: falta definir IP_JUEGO=<IP publica del VPS>" >&2

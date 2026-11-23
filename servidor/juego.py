@@ -559,6 +559,7 @@ class Juego(asyncio.Protocol):
                     lotes_base = fichas.lotes_de_entrada(captura.lotes_capturados() if REPRODUCIR else [], self.cuenta)
                     self.lotes = [captura.con_llave(x, llave_con) for x in lotes_base] if lotes_base else []
                     anotar("   cuenta por FF02: %s usn %d (sesion valida)" % (self.cuenta["nick"], usn))
+                    estado.anotar_en_linea()          # M19: el contador de la lista de canales
                     anotar("   llave de hardware del cliente (PASE=si): %d B -> usada en S2C FF02" % len(cuerpo))
                 elif ajustes.pase_activo():
                     llave_cli = captura.llave_de_c2s_ff02(cuerpo)
@@ -617,6 +618,7 @@ class Juego(asyncio.Protocol):
         if estado.CONEXIONES.get(self.id_con) is self:
             del estado.CONEXIONES[self.id_con]
         manejadores.desconectado(self)     # 01-nov: la conexion caida saca al jugador de su sala (como salir)
+        estado.anotar_en_linea()           # M19
         anotar(":%d se cerro la conexion (%s)  lotes entregados: %d/%d%s"
                % (self.puerto, exc or "normal", self.i_lote, len(self.lotes),
                   ("   ⚠ %d bytes sin encuadrar: %s" % (len(self.buf), self.buf[:32].hex(" ")))
@@ -627,6 +629,7 @@ async def main():
     estado.anotar = anotar
     recarga.iniciar(anotar)
     cuenta.preparar(anotar)          # M09: con CUENTA_SQLITE=1, cuentas.db listo (y migrado) al arrancar
+    estado.anotar_en_linea()   # M19: 0 al arrancar (sin conexiones), asi un reinicio no deja un numero viejo
     anotar("llave de hardware: %s (la de la captura: %s)%s" % (
         "0x%08x" % LLAVE if LLAVE is not None else "NO SE PUDO LEER", "0x%08x" % LLAVE_CAP if LLAVE_CAP else "-",
         "" if LLAVE is None or LLAVE == LLAVE_CAP else " -> va la de ESTA maquina en el FF02 y en los FF05"))

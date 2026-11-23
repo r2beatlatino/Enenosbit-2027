@@ -41,6 +41,7 @@ Uso:  python login.py            (escucha en 127.0.0.1 y 192.168.31.100, puerto 
 """
 import asyncio
 import hmac
+import json
 import os
 import re
 import secrets
@@ -273,6 +274,27 @@ def sin_canal_baile(cuerpo):
     return bytes([len(quedan)]) + b"".join(quedan) + cuerpo[pos:]
 
 
+def _usuarios_en_linea():
+    """23-nov (maduracion M19): los jugadores con cuenta conectados al juego, de `en_linea.json` (lo escribe juego.py en cada
+    entrada y salida, y 0 al arrancar). Sin archivo: 0. Va en un u8 (tope 255).
+    CANAL_USUARIOS_FIJO=<n> lo fija (como antes: 32)."""
+    fijo = (os.environ.get("CANAL_USUARIOS_FIJO") or "").strip()
+    if fijo.isdigit():
+        return min(255, int(fijo))
+    try:
+        with open(os.path.join(ajustes.carpeta_cuenta(), "en_linea.json"), encoding="utf-8") as f:
+            d = json.load(f)
+        return max(0, min(255, int(d.get("n", 0))))
+    except (OSError, ValueError, TypeError):
+        return 0
+
+
+def _maximo_canal():
+    """CANAL_MAXIMO (u16): el maximo que muestra la lista de canales. Por omision 1800, el del oficial."""
+    v = (os.environ.get("CANAL_MAXIMO") or "").strip()
+    return max(1, min(65535, int(v))) if v.isdigit() else 1800
+
+
 def respuesta_lista():
     """CmdLobbyServerList (cmd 0x03, 0x02754510).
 
@@ -298,9 +320,9 @@ def respuesta_lista():
             + struct.pack("<I", 0)
             + struct.pack("<H", puerto)                 # PUERTO del servidor de juego
             + struct.pack("<B", len(ip)) + ip           # IP del servidor de juego
-            + struct.pack("<B", 32)                     # usuarios (0x20 en el oficial)
+            + struct.pack("<B", _usuarios_en_linea())   # usuarios conectados de verdad (M19; antes 32 fijo, 0x20 en el oficial)
             + struct.pack("<B", 0)
-            + struct.pack("<H", 1800)                   # maximo (0x0708 en el oficial)
+            + struct.pack("<H", _maximo_canal())        # maximo (CANAL_MAXIMO; 1800 = 0x0708 del oficial)
             + struct.pack("<B", 30)
             + struct.pack("<B", len(nombre)) + nombre   # nombre del canal
             # los tres textos del final: en el oficial el primero es una URL y los otros dos vacios

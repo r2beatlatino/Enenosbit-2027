@@ -48,6 +48,8 @@ La lista exacta para copiar esta en [`archivos_que_viajan.txt`](archivos_que_via
 | `CUENTA_DATOS` | `/ruta/datos_cuentas` | Carpeta vacia/persistente donde se crea `cuenta.json` |
 | `MUSICA_2013` | `1` (omision en `arrancar.sh` y `Dockerfile`) | Catalogo 2013 de `datos/musica_2013` (ficha 179). SOLO con el cliente que trae `rnr_musica2013.pak` y `rnr_music2013_*.pak`: con uno viejo, 9 canciones lo cierran |
 | `SIN_CANAL_BAILE` | `1` (omision) | Modo Baile abre en el servidor de siempre (ficha 175) |
+| `CANAL` | `N2server` (omision en `arrancar.sh`) | Nombre del servidor en la lista de canales (FF03). Una ñ se ve como `?0?9` en esa parte del cliente (medido, M19) |
+| `CANAL_MAXIMO` | `1800` | Maximo de la barra "usuarios/maximo" de la lista (u16). Los usuarios son los conectados de verdad (`en_linea.json`) |
 | `CUENTA_SQLITE` | `1` (omision en `arrancar.sh`) | Cuentas en `cuentas.db` (SQLite WAL) en `CUENTA_DATOS`; la 1.a vez migra `cuenta.json` y lo deja intacto (maduracion M09). `0` = `cuenta.json` como antes |
 | `GESTOS_TODOS` | `1` (omision) | Palabras de gesto de todos los idiomas (ficha 133) |
 | `R2_CUENTAS_FICHA_INTERNA` | `<secreto compartido>` | Ficha interna del Coordinador para `/interno/panel/*` (sin esta variable y `PANEL_PUERTO`, el panel interno no se abre) |
