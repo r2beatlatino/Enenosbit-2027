@@ -585,9 +585,11 @@ def _validar_sesion(gsn, clave, sesion_id):
         return None
     if ses["sesion_id"] != int(sesion_id) or not ses["sesion_id"]:
         return None
-    if not isinstance(clave, str) or not hmac.compare_digest(ses["clave"], clave):
+    if not isinstance(clave, str):
         return None
-    return ses
+    if hmac.compare_digest(ses["clave"], clave):
+        return ses
+    return None
 
 
 def extraer_ticket_ff01(cuerpo):
@@ -619,6 +621,22 @@ def respuesta_login_pase(steamid_bytes, gsn, clave_sesion, sesion_id):
             + struct.pack("<I", len(clave_b)) + clave_b
             + struct.pack("<I", int(sesion_id))
             + struct.pack("<IQI", 0, 0, 0))
+
+
+def claves_candidatas_ff02(cuerpo):
+    """23-nov (maduracion, cerebro): los textos [u8 largo][ascii] que siguen al byte 13 del C2S FF02. MEDIDO con el juego: el
+    FF02 de la RECONEXION (al volver al selector, 72 B) trae primero un texto de 2 B y DESPUES la clave de sesion de 32
+    (en el de entrada, 102 B, la clave va primera). Se usa solo si la lectura de siempre no valida."""
+    out, pos = [], 13
+    for _ in range(4):
+        if pos >= len(cuerpo) - 4:
+            break
+        n = cuerpo[pos]
+        if pos + 1 + n > len(cuerpo) - 4:
+            break
+        out.append(cuerpo[pos + 1:pos + 1 + n].decode("ascii", errors="replace"))
+        pos += 1 + n
+    return out
 
 
 def leer_ff02_sesion(cuerpo):
@@ -704,6 +722,12 @@ class Login(asyncio.Protocol):
             r = respuesta_lista()
         self.tr.write(marco(0x03, seq, r))
         anotar("   S2C FF03 CmdLobbyServerList -> puerto %d: %d bytes" % (puerto_dest, len(r)))
+        # 23-nov (maduracion, cerebro): en modo pase, el login CIERRA su conexion poco despues de la lista. MEDIDO con el
+        # juego: si queda abierta, al tocar 角色选择 el cliente se queda en Loading y nunca vuelve a pedir el FF02 (el 2013 ya
+        # lo sabia: CERRAR_LOGIN_TRAS_HANDOFF). Cerrada, reconecta con su sesion (FF02 sin FF01) y recibe el FF0B.
+        # LOGIN_CIERRA_TRAS_LISTA=0 lo apaga.
+        if pase.modo_pase() and (os.environ.get("LOGIN_CIERRA_TRAS_LISTA") or "1").strip().lower() in ("1", "si"):
+            asyncio.get_running_loop().call_later(5.0, self._cerrar, "handoff al juego terminado (LOGIN_CIERRA_TRAS_LISTA)")
 
     def _manejar_pase(self, cmd, seq, cuerpo):
         if cmd == 0x01:
@@ -740,8 +764,27 @@ class Login(asyncio.Protocol):
                 return
             gsn, usn, clave_c2s, ses_id_c2s = leido
             ses = _validar_sesion(gsn, clave_c2s, ses_id_c2s)
+            if ses is None and (os.environ.get("RECONEXION_SESION") or "1").strip().lower() in ("1", "si"):
+                # 23-nov (maduracion, cerebro), MEDIDO con el juego (`_fuera_git/vivo_M01/SELECTOR_*`): al volver al selector
+                # (角色选择) el cliente reconecta con un FF02 de 72 B cuyo 1.er texto es de 2 B y NO trae la clave de sesion
+                # (el texto de 32 que sigue tampoco es la clave ni un hash de ella). Lo unico firme es gsn + sesion_id (u32 al
+                # azar, solo lo conoce ese cliente): se acepta si coinciden con la sesion VIVA y el FF02 tiene esa forma.
+                cands = claves_candidatas_ff02(cuerpo)
+                viva = _SESIONES.get(int(gsn))
+                if (cands and len(cands[0]) <= 4 and viva is not None and viva["expira"] >= time.time()
+                        and viva["sesion_id"] and viva["sesion_id"] == int(ses_id_c2s)):
+                    ses = viva
+                    anotar("   sesion por reconexion (FF02 de %d B): gsn %d + sesion_id de la sesion viva" % (len(cuerpo), gsn))
             if ses is None or (self.usuario is not None and self.usuario["gsn"] != gsn):
-                self._cerrar("FF02 sin sesion valida (gsn %d)" % gsn)
+                guardada = _SESIONES.get(int(gsn))
+                self._cerrar("FF02 sin sesion valida (gsn %d; clave %d B, clave igual: %s, sesion_id igual: %s, hay sesion: %s)" % (
+                    gsn, len(clave_c2s or ""),
+                    "si" if guardada and hmac.compare_digest(guardada["clave"], clave_c2s or "") else (
+                        "no"),
+                    "si" if guardada and guardada["sesion_id"] == ses_id_c2s else "no",
+                    "si" if guardada else "no"))
+                if clave_c2s is not None and len(clave_c2s) <= 4:      # corta: no puede ser una clave de sesion real
+                    anotar("   (clave corta recibida: %r; cuerpo FF02 %d B: %s)" % (clave_c2s, len(cuerpo), cuerpo[8:40].hex(" ")))
                 return
             u = cuentas.usuario_por_steamid(ses["usuario"])
             if u is None or u.get("capturada"):
