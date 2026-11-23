@@ -895,6 +895,7 @@ class Login(asyncio.Protocol):
 async def main():
     if pase.modo_pase():
         pase.inicializar(log=anotar)
+    cuenta.preparar(anotar)          # M09: con CUENTA_SQLITE=1, cuentas.db listo (y migrado) al arrancar
     for h in HOSTS:
         for p in PUERTOS:
             await asyncio.get_running_loop().create_server(lambda p=p: Login(p), h, p)

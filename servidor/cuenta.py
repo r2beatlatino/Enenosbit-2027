@@ -485,6 +485,18 @@ def _asegurar_db():
     return db_path
 
 
+def preparar(anotar=None):
+    """22-nov (cerebro): al ARRANCAR login.py / juego.py. Con CUENTA_SQLITE=1 deja cuentas.db listo (y migra cuenta.json la
+    1.a vez) antes de atender a nadie: el error se ve en el arranque y la migracion no le toca a un jugador en pleno login.
+    Sin la llave no hace nada. Devuelve la ruta del almacen en uso."""
+    if not _usar_sqlite():
+        return ruta()
+    r = _asegurar_db()
+    n = _ejecutar_lectura_db(lambda con: con.execute("SELECT COUNT(*) FROM cuentas").fetchone()[0])
+    (anotar or _anotar)("cuenta.py: almacen SQLite listo (%s, %d cuentas)" % (r, n))
+    return r
+
+
 def _ejecutar_escritura_db(fn):
     """Abre cuentas.db, inicia BEGIN IMMEDIATE, llama fn(con) -> (escribio, res), hace COMMIT o ROLLBACK y cierra."""
     db_path = _asegurar_db()
