@@ -48,6 +48,7 @@ La lista exacta para copiar esta en [`archivos_que_viajan.txt`](archivos_que_via
 | `CUENTA_DATOS` | `/ruta/datos_cuentas` | Carpeta vacia/persistente donde se crea `cuenta.json` |
 | `MUSICA_2013` | `1` (omision en `arrancar.sh` y `Dockerfile`) | Catalogo 2013 de `datos/musica_2013` (ficha 179). SOLO con el cliente que trae `rnr_musica2013.pak` y `rnr_music2013_*.pak`: con uno viejo, 9 canciones lo cierran |
 | `SIN_CANAL_BAILE` | `1` (omision) | Modo Baile abre en el servidor de siempre (ficha 175) |
+| `CUENTA_SQLITE` | `1` (omision en `arrancar.sh`) | Cuentas en `cuentas.db` (SQLite WAL) en `CUENTA_DATOS`; la 1.a vez migra `cuenta.json` y lo deja intacto (maduracion M09). `0` = `cuenta.json` como antes |
 | `GESTOS_TODOS` | `1` (omision) | Palabras de gesto de todos los idiomas (ficha 133) |
 | `R2_CUENTAS_FICHA_INTERNA` | `<secreto compartido>` | Ficha interna del Coordinador para `/interno/panel/*` (sin esta variable y `PANEL_PUERTO`, el panel interno no se abre) |
 | `PANEL_PUERTO` | `28191` (ejemplo) | Puerto HTTP del panel interno («contrato1») dentro de `juego.py`. **Solo red interna: NO poner en `ports:` del compose** |
