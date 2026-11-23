@@ -229,6 +229,34 @@ def _sexo_de(pj):
     return None
 
 
+def _apariencia_de(pj):
+    """23-nov (maduracion, para el muneco del launcher): lo que lleva puesto el personaje, tal cual lo usa el cliente.
+    - cuerpo: char_id (0x1FF54.. = cuerpo base; par varon, impar mujer). None si no esta creado.
+    - partes: los ids de `personaje.partes` (la misma lista que va en el S2C FF7F, con la que el cliente viste al muneco).
+      Cada id es el `Index` de rnr_script/shop.txt (= `code` de config/items_tbitems.json) dentro de rnr_script.pak.
+      `pestana` = ShopIndex de shop.txt (catalogo.json: 301 pelo, 302 arriba, 303 abajo, 304 zapatos... MEDIDO solo el
+      numero, el nombre de cada pestana sale de la tienda del cliente).
+    - mascota / alas: None (el servidor no las guarda en el personaje).
+    El paso id -> archivo de modelo/textura y su .pak NO esta medido aca (ver la sesion Biblioteca de ropa)."""
+    if not isinstance(pj, dict):
+        return None
+    try:
+        import catalogo
+        pest = catalogo.pestana
+    except Exception:                                            # noqa: BLE001
+        pest = lambda _i: None                                   # noqa: E731
+    partes = []
+    for x in pj.get("partes") or []:
+        try:
+            i = int(x)
+        except (TypeError, ValueError):
+            continue
+        partes.append({"id": i, "pestana": pest(i)})
+    cid = pj.get("char_id")
+    return {"cuerpo": cid if isinstance(cid, int) else None, "sexo": _sexo_de(pj), "partes": partes,
+            "mascota": None, "alas": None}
+
+
 def _get_personajes(query):
     """23-nov (maduracion, para el launcher: los minichars de la cuenta). GET personajes?enenos_id=<n> -> los personajes de
     `e<n>` sin los borrados, con sexo y conectado. `nivel` va en null: el servidor no tiene la tabla de niveles del jugador
@@ -246,7 +274,7 @@ def _get_personajes(query):
     for p in _personajes_de_usuario(steamid, todas):
         acc = todas.get(str(p["id"])) or {}
         out.append({"id": p["id"], "nick": p["nick"], "sexo": _sexo_de(acc.get("personaje")), "nivel": None,
-                    "conectado": p["id"] in vivos})
+                    "conectado": p["id"] in vivos, "apariencia": _apariencia_de(acc.get("personaje"))})
     return 200, {"personajes": out, "maximo": maximo}
 
 
