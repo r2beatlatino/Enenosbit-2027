@@ -6,6 +6,7 @@ servidor/carrera.py
 servidor/casa.py
 servidor/catalogo.py
 servidor/charla.py
+servidor/circulo.py
 servidor/correo.py
 servidor/cuenta.py
 servidor/cuenta_local.py
