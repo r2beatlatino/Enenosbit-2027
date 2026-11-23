@@ -892,6 +892,39 @@ def _sql_sesion(gsn):
     return _ejecutar_lectura_db(q)
 
 
+def _sql_leer_arriba(clave, defecto=None):
+    k = str(clave)
+    if k in _CLAVES_TABLA:
+        raise ValueError("clave reservada: %s" % k)
+    def q(con):
+        row = con.execute("SELECT datos FROM arriba WHERE clave = ?", (k,)).fetchone()
+        return _loads(row[0]) if row is not None else copy.deepcopy(defecto)
+    return _ejecutar_lectura_db(q)
+
+
+def _sql_cambiar_arriba(clave, funcion, defecto=None):
+    k = str(clave)
+    if k in _CLAVES_TABLA:
+        raise ValueError("clave reservada: %s" % k)
+    def tx(con):
+        row = con.execute("SELECT datos FROM arriba WHERE clave = ?", (k,)).fetchone()
+        antes_raw = row[0] if row is not None else None
+        valor = _loads(antes_raw) if antes_raw is not None else copy.deepcopy(defecto)
+        res = funcion(valor)
+        despues_raw = _dumps(valor)
+        if antes_raw is None and valor == defecto:
+            return False, res
+        if despues_raw != antes_raw:
+            con.execute(
+                "INSERT INTO arriba(clave, datos) VALUES (?, ?) "
+                "ON CONFLICT(clave) DO UPDATE SET datos = excluded.datos",
+                (k, despues_raw),
+            )
+            return True, res
+        return False, res
+    return _ejecutar_escritura_db(tx)
+
+
 # ---------- API publica ----------
 
 def todas():
@@ -1082,3 +1115,31 @@ def sesion(gsn):
         return _sql_sesion(gsn)
     s = (_cargar().get("sesiones") or {}).get(str(gsn))
     return copy.deepcopy(s) if isinstance(s, dict) else None
+
+
+def leer_arriba(clave, defecto=None):
+    """Copia de una clave de arriba del almacen de cuentas (tabla `arriba` con CUENTA_SQLITE=1), o `defecto` si falta."""
+    k = str(clave)
+    if k in _CLAVES_TABLA:
+        raise ValueError("clave reservada: %s" % k)
+    if _usar_sqlite():
+        return _sql_leer_arriba(k, defecto)
+    d = _cargar()
+    return copy.deepcopy(d[k]) if k in d else copy.deepcopy(defecto)
+
+
+def cambiar_arriba(clave, funcion, defecto=None):
+    """Con el candado: relee la clave de arriba `clave`, llama funcion(valor) en el lugar y guarda si cambio."""
+    k = str(clave)
+    if k in _CLAVES_TABLA:
+        raise ValueError("clave reservada: %s" % k)
+    if _usar_sqlite():
+        return _sql_cambiar_arriba(k, funcion, defecto)
+    def f(d):
+        existia = k in d
+        valor = d[k] if existia else copy.deepcopy(defecto)
+        res = funcion(valor)
+        if existia or valor != defecto:
+            d[k] = valor
+        return res
+    return cambiar_todas(f)

@@ -564,10 +564,21 @@ def pareja(con, seq, cuerpo):
 
 
 def tunel(con, seq, cuerpo):
-    """FF40 CmdSessionForward: por ahora solo el sub 0x21 (GuildInfo). El resto sigue su camino (captura)."""
+    """FF40 CmdSessionForward: circulo (0x21..0x23, llave CIRCULOS), amigos, susurro, megafono, pareja, ficha."""
     if cuerpo == b"\x21":
+        import circulo
+        if circulo.activo():
+            return circulo.enviar_info(con, seq)
         con.mandar_interno(0x40, seq, b"\x21\x00\x00" + b"\xff" * 4 + bytes(6))
         return True
+    if cuerpo[:1] == b"\x22" and len(cuerpo) >= 2:
+        import circulo
+        if circulo.chat_circulo(con, seq, cuerpo):
+            return True
+    if cuerpo[:1] == b"\x23" and len(cuerpo) >= 2:
+        import circulo
+        if circulo.aviso_desde_cliente(con, seq, cuerpo):
+            return True
     if cuerpo[:1] == b"\x09" and len(cuerpo) == 5:
         return borrar_amigo(con, seq, cuerpo)
     if cuerpo[:1] in (b"\x04", b"\x0d"):
