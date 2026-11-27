@@ -568,14 +568,91 @@ def _guardar_partes(con, partes):
         return False
 
 
+# ---------- casillas de la ropa (M23, 27-nov) ----------
+# MEDIDO en los registros de prod (21..27-nov): con la regla vieja "familia = item // 10000" una prenda de 8 cifras (20310144)
+# no reemplazaba a la basica de su casilla (310565) y 27 de 66 personajes quedaron con 2 a 4 prendas en la misma casilla (hasta
+# 16 partes; el selector lleva 11). La casilla sale del catalogo (shop.txt, campo `s`): 20310144 y 310565 dicen 302.
+# 301..307 = varon (x = 1 en el catalogo), 401..407 = mujer (x = 2).
+CASILLA_VARIAS = 509          # `s` 509 (433 objetos, p. ej. 1000001): la regla del 2013 la dejaba aparte ("un cajon").
+#                               DECISION: se pueden llevar varios a la vez, sin reemplazo
+CASILLAS_ROPA = (3, 4)        # `s // 100` de la ropa con sexo: lo unico que saca "sacar todo" (DECISION: efectos y otros quedan)
+
+
+def ropa_por_casilla():
+    """Llave ROPA_POR_CASILLA (por omision 1). 0 = como antes: la casilla es item // 10000 y no se ordena nada al entrar."""
+    return (os.environ.get("ROPA_POR_CASILLA") or "1").strip().lower() in ("1", "si")
+
+
+def casilla(item):
+    """La casilla de un objeto: el `s` del catalogo; sin ficha (o con la llave apagada), la regla vieja ("f", item // 10000)."""
+    if not ropa_por_casilla():
+        return ("f", item // 10000)
+    f = catalogo.ficha(item) or catalogo.ficha("%07d" % item)
+    s = (f or {}).get("s")
+    return s if isinstance(s, int) else ("f", item // 10000)
+
+
+def _es_ropa(item):
+    c = casilla(item)
+    return isinstance(c, int) and c // 100 in CASILLAS_ROPA
+
+
+def ordenar_partes(partes, preferidas=()):
+    """Una prenda por casilla, menos la casilla CASILLA_VARIAS, y sin repetidos. En una casilla doble gana la que este en
+    `preferidas` (lo que el CLIENTE dice tener puesto en su C2S FF7F); si ninguna, la ULTIMA de la lista. Cada casilla queda
+    donde aparecio por primera vez. Un objeto sin ficha en el catalogo no se toca."""
+    pref = set(preferidas or ())
+    elegida = {}
+    for p in partes:
+        c = casilla(p)
+        if isinstance(c, int) and c != CASILLA_VARIAS and not (c in elegida and elegida[c] in pref and p not in pref):
+            elegida[c] = p
+    out, vistas = [], set()
+    for p in partes:
+        c = casilla(p)
+        if not isinstance(c, int) or c == CASILLA_VARIAS:
+            if p not in out:
+                out.append(p)
+        elif c not in vistas:
+            vistas.add(c)
+            out.append(elegida[c])
+    return out
+
+
+def ordenar_ropa_de(cuenta, preferidas=(), guardar=True):
+    """La cuenta con una prenda por casilla (ordenar_partes). guardar=True la GUARDA si cambio (en el C2S FF7F, con lo que pide
+    el cliente); guardar=False da una COPIA sin escribir nada (la rafaga del FF02, antes de saber que tiene el cliente).
+    Sin personaje o sin cambios: la misma cuenta."""
+    pj = (cuenta or {}).get("personaje")
+    if not pj:
+        return cuenta
+    partes = list(pj.get("partes") or [])
+    nuevas = ordenar_partes(partes, preferidas)
+    if nuevas == partes:
+        return cuenta
+    if not guardar:
+        return dict(cuenta, personaje=dict(pj, partes=nuevas))
+    try:
+        import cuentas
+        c2 = cuentas.cambiar(cuenta["steamid"], usn=cuenta.get("usn"), personaje=dict(pj, partes=nuevas)) or cuenta
+    except Exception as e:                                               # noqa: BLE001
+        anotar("   ⛔ M23: no se pudo ordenar la ropa de %s: %r" % (cuenta.get("nick"), e))
+        return cuenta
+    anotar("   M23 ropa de %s: %d partes con casillas dobles -> %d %s" % (cuenta.get("nick"), len(partes), len(nuevas), nuevas))
+    return c2
+
+
 def vestir(con, seq, cuerpo):
     """C2S FF1A SendEditAvatar (38 B; layout en layouts/FF1A.md): [id u32][item u32][u8][4 x u32][u8 byEditType @25][12 ceros].
-    Regla del 2013: una prenda por familia (item // 10000), menos la familia 0509 (un cajon).
+    Una prenda por CASILLA (el `s` del catalogo, M23), menos la casilla CASILLA_VARIAS.
       poner (1): exige que el item este en el inventario de la cuenta (o sea basico o ya puesto) -> reemplaza la prenda de la
-                 misma familia, guarda y avisa a la sala (FF0C). Si no lo tiene: S2C `[1]` y no escribe nada.
-      sacar (0): si lo lleva y NO es una basica -> vuelve la basica de esa familia (si el personaje tiene una) y se la manda al
+                 misma casilla, guarda y avisa a la sala (FF0C). Si no lo tiene: S2C `[1]` y no escribe nada.
+      sacar (0): si lo lleva y NO es una basica -> vuelve la basica de esa casilla (si el personaje tiene una) y se la manda al
                  cliente como un `poner`. Si no lo lleva, lo deja como esta. Una prenda basica no se saca (S2C `[1]`).
-      otro (2 = sacar todo, 4...): no atendido (S2C `[1]` y nada escrito); el exe lo trata del lado S2C pero no se midio en vivo.
+      sacar todo (2, M23): saca la ropa NO basica de las casillas 3xx/4xx y repone las basicas que falten. El S2C de tipo 2
+                 del exe (0x00912360) borra con una regla propia que no se midio, asi que NO se usa: se contesta con lo ya
+                 medido, un S2C `sacar` por prenda y un `poner` por cada basica repuesta.
+      otro (4...): no atendido (S2C `[1]` y nada escrito).
     ⏳ vencimiento: ver RECHAZAR_VENCIDOS."""
     if len(cuerpo) != 38:
         return False
@@ -583,11 +660,12 @@ def vestir(con, seq, cuerpo):
     tipo = cuerpo[25]
     pj = (con.cuenta or {}).get("personaje")
     nick = (con.cuenta or {}).get("nick")
+    nombre = {EDITAR_PONER: "vestir", EDITAR_SACAR: "desvestir", EDITAR_SACAR_TODO: "sacar todo"}.get(tipo, "editar")
 
     def error(motivo):
         con.mandar_interno(0x1A, seq, bytes([RES_VESTIR_FALLA]))
         anotar("   C2S FF1A %s %d (usn %d, byEditType %d) -> S2C FF1A error %d: %s"
-               % ("vestir" if tipo == EDITAR_PONER else "desvestir", item, usn, tipo, RES_VESTIR_FALLA, motivo))
+               % (nombre, item, usn, tipo, RES_VESTIR_FALLA, motivo))
         return True
     if not pj:      # la sesion capturada (sin personaje propio): se contesta como siempre y no se guarda nada
         con.mandar_interno(0x1A, seq, _respuesta_ff1a(EDITAR_PONER, item))
@@ -596,18 +674,22 @@ def vestir(con, seq, cuerpo):
     partes = list(pj.get("partes", []))
     basicas = _con_bolsa(con, lambda b: list(b.get("basicas", [])))
     nuevas = None
+    detalle = ""
     if tipo == EDITAR_PONER:
         if not _con_bolsa(con, lambda b: _tiene_para_vestir(b, item, partes)):
             return error("el item no esta en el inventario de %s" % nick)
-        if item // 10000 != 509:
-            nuevas = list(partes)
-            familia = [i for i, p in enumerate(nuevas) if p // 10000 == item // 10000]
-            if familia:
-                nuevas[familia[0]] = item
+        cas = casilla(item)
+        nuevas = ordenar_partes(partes)
+        if cas == CASILLA_VARIAS:
+            if item not in nuevas:
+                nuevas.append(item)
+        else:
+            lugar = [i for i, p in enumerate(nuevas) if casilla(p) == cas]
+            if lugar:
+                nuevas[lugar[0]] = item
             else:
                 nuevas.append(item)
         con.mandar_interno(0x1A, seq, _respuesta_ff1a(EDITAR_PONER, item))
-        extra = None
     elif tipo == EDITAR_SACAR:
         if item not in partes:
             con.mandar_interno(0x1A, seq, _respuesta_ff1a(EDITAR_SACAR, item))
@@ -615,20 +697,34 @@ def vestir(con, seq, cuerpo):
             return True
         if item in basicas:
             return error("es una prenda basica del personaje: no se saca")
-        base = next((p for p in basicas if p // 10000 == item // 10000), None)
+        cas = casilla(item)
+        base = next((p for p in basicas if casilla(p) == cas), None) if cas != CASILLA_VARIAS else None
+        if base is not None and base in partes:
+            base = None                           # la basica ya esta puesta (casilla doble vieja): solo se saca la otra
         nuevas = [base if p == item else p for p in partes] if base is not None else [p for p in partes if p != item]
         con.mandar_interno(0x1A, seq, _respuesta_ff1a(EDITAR_SACAR, item))
-        extra = base
         if base is not None:      # el cliente solo borra el item de su lista: la basica hay que ponersela
             con.mandar_interno(0x1A, 0, _respuesta_ff1a(EDITAR_PONER, base))
+            detalle = " + basica %d" % base
+    elif tipo == EDITAR_SACAR_TODO and ropa_por_casilla():
+        fuera =[p for p in partes if p not in basicas and _es_ropa(p)]
+        quedan = [p for p in partes if p not in fuera]
+        ocupadas = {casilla(p) for p in quedan}
+        repuestas = [b for b in basicas if _es_ropa(b) and casilla(b) not in ocupadas]
+        nuevas = ordenar_partes(quedan + repuestas)
+        if not fuera:
+            con.mandar_interno(0x1A, seq, _respuesta_ff1a(EDITAR_SACAR, item))
+        for k, p in enumerate(fuera):
+            con.mandar_interno(0x1A, seq if k == 0 else 0, _respuesta_ff1a(EDITAR_SACAR, p))
+        for b in repuestas:
+            con.mandar_interno(0x1A, 0, _respuesta_ff1a(EDITAR_PONER, b))
+        detalle = " (saco %s, repuso %s)" % (fuera, repuestas)
     else:
         return error("byEditType %d no atendido" % tipo)
     if nuevas is not None and nuevas != partes:
         _guardar_partes(con, nuevas)
     anotar("   C2S FF1A %s %d (usn %d, byEditType %d) -> S2C FF1A ok%s; partes ahora %s"
-           % ("vestir" if tipo == EDITAR_PONER else "desvestir", item, usn, tipo,
-              " + basica %d" % extra if tipo == EDITAR_SACAR and extra else "",
-              ((con.cuenta or {}).get("personaje") or {}).get("partes")))
+           % (nombre, item, usn, tipo, detalle, ((con.cuenta or {}).get("personaje") or {}).get("partes")))
     sala = estado.SALAS.get(con.sala)
     if sala is not None:
         import salas
@@ -658,9 +754,12 @@ def avatar(con, seq, cuerpo):
     pj = (con.cuenta or {}).get("personaje")
     if not pj or not cuerpo:
         return False
+    pedido = list(struct.unpack_from("<%dI" % cuerpo[0], cuerpo, 1)) if len(cuerpo) >= 1 + 4 * cuerpo[0] else []
+    if ropa_por_casilla():         # M23: casillas dobles guardadas -> una por casilla, la que el cliente dice tener puesta
+        con.cuenta = ordenar_ropa_de(con.cuenta, preferidas=pedido)
+        pj = con.cuenta.get("personaje") or pj
     partes = list(pj.get("partes", []))
     con.mandar_interno(0x7F, seq, bytes([len(partes)]) + struct.pack("<%dI" % len(partes), *partes))
-    pedido = list(struct.unpack_from("<%dI" % cuerpo[0], cuerpo, 1)) if len(cuerpo) >= 1 + 4 * cuerpo[0] else []
     anotar("   FF7F de %s: pidio %s -> va la ropa de la cuenta %s" % ((con.cuenta or {}).get("nick"), pedido, partes))
     return True
 

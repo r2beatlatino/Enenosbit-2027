@@ -556,7 +556,9 @@ class Juego(asyncio.Protocol):
                     llave_con = info["llave"]
                     # como el __init__ de siempre: sin REPRODUCIR los lotes van vacios, pero lotes_de_entrada arma igual la
                     # rafaga neutra (FF00) si falta lotes_S2C.bin (modo VPS)
-                    lotes_base = fichas.lotes_de_entrada(captura.lotes_capturados() if REPRODUCIR else [], self.cuenta)
+                    import tienda           # M23: la rafaga (FF7F, FF00) con una prenda por casilla; se GUARDA en el C2S FF7F
+                    cta_lotes = tienda.ordenar_ropa_de(cta, guardar=False) if tienda.ropa_por_casilla() else cta
+                    lotes_base = fichas.lotes_de_entrada(captura.lotes_capturados() if REPRODUCIR else [], cta_lotes)
                     self.lotes = [captura.con_llave(x, llave_con) for x in lotes_base] if lotes_base else []
                     anotar("   cuenta por FF02: %s usn %d (sesion valida)" % (self.cuenta["nick"], usn))
                     estado.anotar_en_linea()          # M19: el contador de la lista de canales

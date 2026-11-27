@@ -68,6 +68,16 @@ SALIDA = open(os.path.join(DIR, time.strftime("login_%Y%m%d_%H%M%S.txt")), "w", 
 T0 = time.time()
 
 
+def _ropa(pj):
+    """La ropa del personaje para el selector: una prenda por casilla (M23, tienda.ordenar_partes); si falla, la guardada."""
+    partes = list((pj or {}).get("partes") or [])
+    try:
+        import tienda
+        return tienda.ordenar_partes(partes) if tienda.ropa_por_casilla() else partes
+    except Exception:                                                    # noqa: BLE001
+        return partes
+
+
 def anotar(txt):
     ln = "[%7.2f s] %s" % (time.time() - T0, txt)
     print(ln, flush=True)
@@ -449,7 +459,7 @@ def ff0b_con_personaje(cuenta):
         return None
     pj = cuenta["personaje"]
     fecha = time.strftime("%Y%m%d%H%M%S", time.strptime(cuenta.get("alta", "2026-11-01 00:00:00"), "%Y-%m-%d %H:%M:%S"))
-    nuevo = {0: cuentas.usn_de(cuenta), 1: pj["char_id"], 2: (list(pj["partes"]) + [0] * 11)[:11],
+    nuevo = {0: cuentas.usn_de(cuenta), 1: pj["char_id"], 2: (_ropa(pj) + [0] * 11)[:11],
              8: textos.codificar(pj["nick"]), 10: fecha.encode()}
     ficha = [(c, t, nuevo.get(c, v)) for c, t, v in campos[0][2]]
     blob = escribir_campos([(0, 7, ficha)])
@@ -526,7 +536,7 @@ def ff0b_multi(personajes, casillas=cuentas.MAX_PERSONAJES):
         reemplazos = {
             0: int(cta["usn"]),
             1: char_id,
-            2: (list(pj.get("partes") or []) + [0] * 11)[:11],
+            2: (_ropa(pj) + [0] * 11)[:11],
             5: int(tienda.get("exp", 0)),
             8: textos.codificar(pj.get("nick") or cta.get("nick") or "Jugador"),
             10: fecha.encode("ascii"),

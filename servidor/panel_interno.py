@@ -245,13 +245,17 @@ def _apariencia_de(pj):
         pest = catalogo.pestana
     except Exception:                                            # noqa: BLE001
         pest = lambda _i: None                                   # noqa: E731
-    partes = []
+    ids = []
     for x in pj.get("partes") or []:
         try:
-            i = int(x)
+            ids.append(int(x))
         except (TypeError, ValueError):
             continue
-        partes.append({"id": i, "pestana": pest(i)})
+    try:
+        ids = tienda.ordenar_partes(ids)       # M23: una prenda por casilla (como la vera el juego al entrar)
+    except Exception:                                            # noqa: BLE001
+        pass
+    partes = [{"id": i, "pestana": pest(i)} for i in ids]
     cid = pj.get("char_id")
     return {"cuerpo": cid if isinstance(cid, int) else None, "sexo": _sexo_de(pj), "partes": partes,
             "mascota": None, "alas": None}
