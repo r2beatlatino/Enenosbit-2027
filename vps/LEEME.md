@@ -51,6 +51,7 @@ La lista exacta para copiar esta en [`archivos_que_viajan.txt`](archivos_que_via
 | `CANAL` | `N2server` (omision en `arrancar.sh`) | Nombre del servidor en la lista de canales (FF03). Una ñ se ve como `?0?9` en esa parte del cliente (medido, M19) |
 | `CANAL_MAXIMO` | `1800` | Maximo de la barra "usuarios/maximo" de la lista (u16). Los usuarios son los conectados de verdad (`en_linea.json`) |
 | `MAPA_COOP` | `56` (omision en `arrancar.sh`) | Escenario del modo gorila/cooperativo: 56 = Glitchland (无尽的黑). Sin la variable, 9/10 (Halloween) como antes |
+| `ROPA_POR_CASILLA` | `1` (omision en el codigo) | Una prenda por casilla (el `s` del catalogo) y "sacar todo" (M23). `0` = como antes (`item // 10000`, casillas dobles) |
 | `CUENTA_SQLITE` | `1` (omision en `arrancar.sh`) | Cuentas en `cuentas.db` (SQLite WAL) en `CUENTA_DATOS`; la 1.a vez migra `cuenta.json` y lo deja intacto (maduracion M09). `0` = `cuenta.json` como antes |
 | `GESTOS_TODOS` | `1` (omision) | Palabras de gesto de todos los idiomas (ficha 133) |
 | `R2_CUENTAS_FICHA_INTERNA` | `<secreto compartido>` | Ficha interna del Coordinador para `/interno/panel/*` (sin esta variable y `PANEL_PUERTO`, el panel interno no se abre) |
