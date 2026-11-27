@@ -21,6 +21,7 @@ servidor/granja.py
 servidor/jardin.py
 servidor/juego.py
 servidor/liga.py
+servidor/lobby_metodos.py
 servidor/login.py
 servidor/manejadores.py
 servidor/misiones.py
