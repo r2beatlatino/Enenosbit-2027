@@ -25,6 +25,7 @@ import gemas
 import granja
 import jardin
 import liga
+import lobby_metodos
 import misiones
 import practica
 import progresion
@@ -37,7 +38,7 @@ import tienda
 
 # misiones va PRIMERO: su 0x3A de 5 B (historia) tiene que verse antes que el "empezar cancion" (practica.py); y su 0x7F/0x57
 # solo observan y devuelven False. practica y cuenta_local van al final: contestan lo que los demas dejaron pasar.
-MODULOS = [misiones, casa, sala_magica, baile, liga, salas, charla, tienda, carrera, social, boda, correo, gemas, granja, jardin, progresion, ranking, practica, cuenta_local]
+MODULOS = [misiones, casa, sala_magica, baile, liga, lobby_metodos, salas, charla, tienda, carrera, social, boda, correo, gemas, granja, jardin, progresion, ranking, practica, cuenta_local]
 BASE = [practica, cuenta_local]       # los que contestan tambien con MANEJADORES_STEAM=0
 
 
