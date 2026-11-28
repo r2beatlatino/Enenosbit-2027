@@ -126,7 +126,8 @@ def ff00_cuerpo(cuenta):
     g = min(0xFFFFFFFF, max(0, int(g)))
     cash = min(0xFFFFFFFF, max(0, int(cash)))
 
-    lic = pj.get("licencia") if pj and pj.get("licencia") is not None else (ajustes.LICENCIA or 1)
+    import misiones                    # M26: la licencia sale de las tarjetas ganadas (llave LICENCIA_POR_MISIONES)
+    lic = misiones.licencia_de(cuenta) if pj else (ajustes.LICENCIA or 1)
 
     # #1..#8: sexo(1), puesto(4), exp_bajo(4), exp_alto(8), g(4), cash(4), licencia(2), u32(4)
     # INVENTADO: #8 u32 final = 0; significado no consta.
@@ -330,7 +331,8 @@ def ff77_examinar(cuenta):
     pj = cuenta.get('personaje') or {}
     nick = textos.codificar(cuenta.get('nick', ''), 12)
     partes = (list(pj.get('partes') or []) + [0] * 6)[:6]
-    lic = int(pj.get('licencia') or ajustes.LICENCIA or 1) & 65535
+    import misiones                    # M26: la misma licencia que el FF00
+    lic = misiones.licencia_de(cuenta) & 65535
     # #1 resultado; #2 usn; #3..#5 INVENTADOS=0; #6 char; #7 licencia;
     # #8..#13 partes (las casillas no usadas, INVENTADAS=0).
     out = bytearray(struct.pack('<BII4sIIH6I', 0, cuenta['usn'], 0, bytes(4),
