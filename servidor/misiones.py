@@ -16,6 +16,7 @@ Enganche: 0x57 (op 87) anota la cancion y NO contesta; 0x7F (el lobby, tras eleg
 solo si la cuenta ya hizo alguna mision.
 """
 import copy
+import os
 import struct
 import time
 
@@ -125,6 +126,27 @@ def contadores_tarjetas(progreso):
             n += 1
         valor |= n << (4 * pos)
     return valor
+
+
+def licencia_por_misiones():
+    """Llave LICENCIA_POR_MISIONES (M26, 27-nov; omision 1). 0 = como antes: la licencia fija de ajustes.LICENCIA (0xFFFF = Sol)."""
+    return os.environ.get("LICENCIA_POR_MISIONES", "1").strip().lower() in ("1", "si")
+
+
+def licencia_de(cuenta):
+    """El u16 m_wLicense de la cuenta (FF00 u16@25 y FF77 #7). LEIDO (docs/tablero/162 y PROGRESION_INVENTARIO.md): el cliente
+    saca el icono de ese u16 (0x00471e00: 0 Novato, 1..15 Estrella, 16..255 Luna, >=256 Sol) y con el mismo valor marca las
+    tarjetas hechas (0x00471f90, la misma funcion que el FF9F +132). Por eso, con la llave, es el valor de las tarjetas que la
+    cuenta GANO (contadores_tarjetas, guardado en la base en personaje.misiones): Estrella con la tarjeta 1, Luna con la 16,
+    Sol con la 256. Una `licencia` puesta a mano en el personaje gana siempre. Sin la llave: ajustes.LICENCIA (o 1)."""
+    import ajustes
+    pj = (cuenta or {}).get("personaje") or {}
+    if pj.get("licencia") is not None:
+        return int(pj["licencia"]) & 0xFFFF
+    if licencia_por_misiones():
+        usn = (cuenta or {}).get("usn")
+        return contadores_tarjetas(progreso_de(usn)) & 0xFFFF if usn else 0
+    return (ajustes.LICENCIA or 1) & 0xFFFF
 
 
 def rcoin_total(progreso):
@@ -443,6 +465,16 @@ def historia(con, seq, cuerpo):
         return False
     if subtipo == HISTORIA_ENTRADA:
         entrar(con, FAMILIA_HISTORIA, codigo)
+        if os.environ.get("HISTORIA_ECO", "1").strip().lower() in ("1", "si"):
+            # M25 (27-nov): la entrada SE CONTESTA con el eco del "empezar cancion" [04][01][u32 partida][u16 codigo]. MEDIDO el 23-oct
+            # (registros/juego_20261023_111049.txt:146): con ese eco el cliente pidio las notas de la carta 4 a los 2,6 s y la
+            # mision arranco. Sin eco (hasta hoy) la tarjeta no arranca: 28 toques sin respuesta en prod (21..27-nov), la de Sol
+            # (256) incluida. HISTORIA_ECO=0 = como antes (sin contestar).
+            con.partida += 1
+            con.mandar_interno(0x3A, seq, bytes([HISTORIA_ENTRADA, 1]) + struct.pack("<IH", con.partida, codigo & 0xFFFF))
+            anotar("   C2S FF3A historia entrada codigo %d -> S2C FF3A eco (partida %d, M25)" % (codigo, con.partida))
+        else:
+            anotar("   C2S FF3A historia entrada codigo %d: sin contestar (HISTORIA_ECO=0)" % codigo)
         return True
     res = cerrar(con, FAMILIA_HISTORIA, codigo, True) if codigo_valido(FAMILIA_HISTORIA, codigo) else \
         {"aceptada": False, "rcoin_total": rcoin_total(progreso_de(usn_de(con)))}
