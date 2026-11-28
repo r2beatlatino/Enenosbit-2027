@@ -46,6 +46,8 @@ def _preparar(b, basicas):
     regalos que falten. b es la seccion `tienda` de la cuenta y se cambia en el lugar."""
     if not b:
         b.update({"diamantes": SALDO_INICIAL, "items": [], "basicas": basicas})
+    if basicas and b.get("exp", 0) < exp_inicial():      # M27: con personaje, nunca por debajo de Lv 1 (se guarda)
+        b["exp"] = exp_inicial()
     dados = b.setdefault("regalos", [])
     for item, cant in REGALOS.items():
         if item not in dados:
@@ -255,12 +257,31 @@ def exp_de(con):
     return _con_bolsa(con, lambda b: b.get("exp", 0))
 
 
+def exp_inicial():
+    """M27: piso de EXP de todo personaje (llave EXP_INICIAL, por omision 500). El "Lv." del cliente de Steam sale de 40
+    umbrales u64 del exe (0x0360d568: 500, 2000, 8000, ...; LEIDO, ficha 162): con EXP 0 no hay nivel (estrella verde sin
+    numero, MEDIDO) y con 500 es Lv 1. 0 = como antes (nacen en Lv 0)."""
+    try:
+        return max(0, int(os.environ.get("EXP_INICIAL", "500")))
+    except ValueError:
+        return 500
+
+
+def con_piso(exp):
+    """La EXP con el piso de exp_inicial() (para lo que lee la bolsa sin pasar por _preparar)."""
+    return max(max(0, int(exp or 0)), exp_inicial())
+
+
 def exp_g_de_cuenta(cuenta):
     """(exp, g) guardados de una cuenta LOCAL (seccion `tienda` de cuenta.json), SOLO LECTURA (no crea la bolsa ni da regalos).
     Es la MISMA fuente de `exp_de` (la que muestra el FF0C): la ficha FF00 y el FF9F usan esto para no dar un salto
-    visible (ficha 81). (0, 0) si la cuenta no tiene nada guardado."""
-    b = _cta.leer_seccion((cuenta or {}).get("usn", 0), "tienda") or {}
-    return max(0, int(b.get("exp", 0))), max(0, int(b.get("g", 0)))
+    visible (ficha 81). (0, 0) si la cuenta no tiene nada guardado (con el piso de M27 si hay personaje)."""
+    cuenta = cuenta or {}
+    b = _cta.leer_seccion(cuenta.get("usn", 0), "tienda") or {}
+    exp = max(0, int(b.get("exp", 0)))
+    if cuenta.get("personaje"):
+        exp = con_piso(exp)
+    return exp, max(0, int(b.get("g", 0)))
 
 
 def saldo(con, seq, cuerpo):

@@ -187,7 +187,7 @@ def _descripcion_personaje(pj):
 def _monedas_de_acc(acc):
     sec = (acc or {}).get("tienda") or {}
     g = max(0, int(sec.get("g", 0) or 0))
-    exp = max(0, int(sec.get("exp", 0) or 0))
+    exp = tienda.con_piso(sec.get("exp", 0)) if (acc or {}).get("personaje") else max(0, int(sec.get("exp", 0) or 0))
     diamantes = max(0, int(sec.get("diamantes", tienda.SALDO_INICIAL) if "diamantes" in sec else tienda.SALDO_INICIAL))
     return {"g": g, "diamantes": diamantes, "exp": exp}
 

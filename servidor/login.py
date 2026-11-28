@@ -533,11 +533,12 @@ def ff0b_multi(personajes, casillas=cuentas.MAX_PERSONAJES):
         except ValueError:
             fecha = "20261101000000"
         char_id = int(pj.get("char_id", 0x1FF54))
+        import tienda as _tienda           # M27 (perezoso: login no carga la tienda al arrancar)
         reemplazos = {
             0: int(cta["usn"]),
             1: char_id,
             2: (_ropa(pj) + [0] * 11)[:11],
-            5: int(tienda.get("exp", 0)),
+            5: _tienda.con_piso(tienda.get("exp", 0)) if pj else int(tienda.get("exp", 0)),     # M27
             8: textos.codificar(pj.get("nick") or cta.get("nick") or "Jugador"),
             10: fecha.encode("ascii"),
             16: int(tienda.get("g", 0)),
